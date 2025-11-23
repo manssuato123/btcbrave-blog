@@ -20,20 +20,20 @@
     "description": "Clique para assistir seu mais novo vídeo publicado no canal do YouTube. O sistema puxa a thumbnail automática do YouTube.",
     "thumbnail": "https://img.youtube.com/vi/SEU_VIDEO_ID/maxresdefault.jpg",
     "link": "https://youtube.com/watch?v=SEU_VIDEO_ID",
-    "pubDate": "2025-11-21T10:00:00Z"
+    "pubDate": "2026-11-21T10:00:00Z"
   },
   {
     "title": "Nova postagem no Instagram",
     "description": "Conteúdo publicado no seu Instagram. Essa notícia leva direto para a postagem original.",
     "thumbnail": "https://blog.btcbrave.store/imgs/instagram.png",
     "link": "https://instagram.com/p/SEU_POST_ID",
-    "pubDate": "2025-11-22T15:00:00Z"
+    "pubDate": "2026-11-22T15:00:00Z"
   },
   {
     "title": "BTCBRAVE – Atualização do projeto",
     "description": "Aqui você poderá publicar novidades importantes sobre o BRAVE, roadmap, holders e atualizações gerais.",
     "thumbnail": "https://blog.btcbrave.store/imgs/btcbrave.png",
     "link": "https://btcbrave.store",
-    "pubDate": "2025-11-23T09:00:00Z"
+    "pubDate": "2026-11-23T09:00:00Z"
   }
 ]
