@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BTCBRAVE – JSON Builder (Auto Mode)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-main: #05060a;
+      --bg-card: #111318;
+      --accent: #d4af37;
+      --accent-soft: #ffdd70;
+      --text-main: #f5f5f5;
+      --text-muted: #a0a4b8;
+      --border-soft: #252837;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at top, #151827 0, #05060a 40%, #020308 100%);
+      color: var(--text-main);
+    }
+
+    header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(5, 6, 10, 0.96);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg,#1d4ed8,#7c3aed,#ec4899,#f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .wrapper {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 18px 40px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #202538 0, #111318 45%, #05060a 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 18px 18px 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .card small {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .field-group {
+      margin-top: 10px;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+    }
+
+    .field-group input,
+    .field-group textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      background: #05060a;
+      color: var(--text-main);
+      font-size: 13px;
+      resize: vertical;
+    }
+
+    .field-group textarea {
+      min-height: 80px;
+      max-height: 260px;
+    }
+
+    .inline-fields {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .inline-fields .field-group {
+      flex: 1 1 150px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .btn-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .primary-btn {
+      border-radius: 999px;
+      padding: 8px 16px;
+      border: none;
+      background: linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f97316);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .secondary-btn {
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid var(--border-soft);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .small-btn {
+      padding: 6px 10px;
+      font-size: 11px;
+    }
+
+    .comma-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .comma-toggle input {
+      margin: 0;
+    }
+
+    .output-area textarea {
+      width: 100%;
+      min-height: 220px;
+      background: #05060a;
+      color: #d1fae5;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      padding: 10px;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 12px;
+      resize: vertical;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">B</div>
+      <div>
+        <div class="logo-text">BTCBRAVE JSON BUILDER</div>
+        <div class="subtitle">Auto Mode – cola a notícia (1, 2 e 3) e o JSON sai pronto.</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrapper">
+    <!-- LADO ESQUERDO: FORMULÁRIO -->
+    <div class="card">
+      <h2>Colar notícia automática (1, 2 e 3)</h2>
+      <small>
+        1 – Título<br>
+        2 – Resumo (description)<br>
+        3 – Texto completo (pode ter vários subtítulos com frases &lt;= 30 caracteres)
+      </small>
+
+      <div class="field-group" style="margin-top:10px;">
+        <textarea id="autoText" placeholder="1 - Título&#10;&#10;2 - Resumo curto&#10;&#10;3 - Texto completo..."></textarea>
+      </div>
+
+      <div class="inline-fields">
+        <div class="field-group" style="max-width:160px;">
+          <label for="imgPrefix">Image Prefix (ex: a / b / aa)</label>
+          <input id="imgPrefix" type="text" value="a" maxlength="4">
+          <div class="hint">Ex: a → a1.png / b → b1.png / aa → aa1.png</div>
+        </div>
+        <div class="field-group" style="flex:0 0 auto; margin-top:26px;">
+          <button type="button" class="primary-btn small-btn" id="useAutoText">
+            Usar texto automaticamente
+          </button>
+        </div>
+      </div>
+
+      <hr style="margin:16px 0; border:0; border-top:1px solid rgba(255,255,255,0.08);">
+
+      <div class="field-group">
+        <label for="title">Title *</label>
+        <input id="title" type="text" placeholder="Ex: BTCBRAVE launches new alert system">
+      </div>
+
+      <div class="field-group">
+        <label for="description">Description *</label>
+        <textarea id="description" placeholder="Resumo curto da notícia ou post."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label for="link">Link *</label>
+        <input id="link" type="text" placeholder="https://blog.btcbrave.store/seu-post.html">
+        <div class="hint">Se estiver vazio na hora de gerar, vira https://blog.btcbrave.store/</div>
+      </div>
+
+      <div class="field-group">
+        <label for="thumbnail">Thumbnail (URL da imagem) *</label>
+        <input id="thumbnail" type="text" placeholder="https://blog.btcbrave.store/imgs/a1.png">
+        <div class="hint">Prefixo + contador: a1.png, a2.png, a3.png…</div>
+      </div>
+
+      <div class="inline-fields">
+        <div class="field-group">
+          <label for="pubDate">Date (ISO) *</label>
+          <input id="pubDate" type="text" placeholder="2025-11-27T02:56:49.158Z">
+        </div>
+        <div class="field-group" style="flex:0 0 auto; margin-top:24px;">
+          <button class="secondary-btn small-btn" id="nowBtn">Agora</button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="fullText">Full Text *</label>
+        <textarea id="fullText" placeholder="<p>Conteúdo completo em HTML para abrir no popup.</p>"></textarea>
+        <div class="hint">Frases ≤ 30 caracteres viram &lt;h2&gt; automaticamente, o restante vira &lt;p&gt;.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="primary-btn" id="generateBtn">Gerar JSON</button>
+        <label class="comma-toggle">
+          <input type="checkbox" id="commaToggle">
+          adicionar vírgula no final
+        </label>
+        <!-- BOTÃO: LIMPAR LADO ESQUERDO -->
+        <button type="button" class="secondary-btn" id="clearLeftBtn">
+          Limpar lado esquerdo
+        </button>
+      </div>
+    </div>
+
+    <!-- LADO DIREITO: SAÍDA -->
+    <div class="card output-area">
+      <h2>JSON gerado</h2>
+      <small>Copie e cole este bloco dentro do seu <code>posts.json</code> ou <code>news.json</code>.</small>
+
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="primary-btn" id="copyBtn">Copiar JSON</button>
+      </div>
+
+      <div class="field-group" style="margin-top:10px;">
+        <textarea id="outputJson" readonly placeholder='O JSON gerado aparecerá aqui...'></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const autoTextEl   = document.getElementById('autoText');
+  const imgPrefixEl  = document.getElementById('imgPrefix');
+
+  const titleEl      = document.getElementById('title');
+  const descEl       = document.getElementById('description');
+  const linkEl       = document.getElementById('link');
+  const thumbEl      = document.getElementById('thumbnail');
+  const pubDateEl    = document.getElementById('pubDate');
+  const fullTextEl   = document.getElementById('fullText');
+  const outputJsonEl = document.getElementById('outputJson');
+  const commaToggle  = document.getElementById('commaToggle');
+  const clearLeftBtn = document.getElementById('clearLeftBtn');
+
+  let imgCounter = 1;
+
+  // Botão "Agora" – data/hora atual em ISO
+  document.getElementById('nowBtn').addEventListener('click', () => {
+    pubDateEl.value = new Date().toISOString();
+  });
+
+  // Botão: usar texto automático (por parágrafos)
+  document.getElementById('useAutoText').addEventListener('click', () => {
+    const raw    = (autoTextEl.value || '').trim();
+    const prefix = (imgPrefixEl.value || 'a').trim();
+
+    if (!raw) {
+      alert('Cole o texto com parágrafos:\n\n1º parágrafo = título\n2º parágrafo = resumo\nDo 3º em diante = texto completo');
+      return;
+    }
+
+    // quebra por PARÁGRAFOS (linha em branco)
+    let blocks = raw
+      .split(/\n\s*\n+/)       // separa por linhas em branco
+      .map(b => b.trim())
+      .filter(b => b.length);  // remove vazios
+
+    if (blocks.length < 3) {
+      alert('Precisa ter pelo menos: título (1º parágrafo), resumo (2º) e texto completo (3º parágrafo em diante).');
+      return;
+    }
+
+    // remove numeração tipo "1 ", "2 ", "3 " no começo dos parágrafos
+    const cleanBlock = (txt) => txt.replace(/^\d+\s+/, '').trim();
+
+    const title = cleanBlock(blocks[0] || '');
+    const desc  = cleanBlock(blocks[1] || '');
+    const bodyBlocks = blocks.slice(2).map(cleanBlock);
+
+    if (!title || !desc || bodyBlocks.length === 0) {
+      alert('Verifique se o título, o resumo e o texto completo foram preenchidos corretamente.');
+      return;
+    }
+
+    // monta HTML do texto completo: cada parágrafo → <p>
+    const html = bodyBlocks
+      .map(par => `<p>${par}</p>`)
+      .join('\n\n');
+
+    // preenche campos
+    titleEl.value    = title;
+    descEl.value     = desc;
+    fullTextEl.value = html;
+
+    // -------- IMAGEM AUTOMÁTICA --------
+    const imgName = `${prefix}${imgCounter}.png`;
+    thumbEl.value = `https://blog.btcbrave.store/imgs/${imgName}`;
+    imgCounter++;
+
+    // -------- DATA AUTOMÁTICA --------
+    pubDateEl.value = new Date().toISOString();
+
+    // -------- LINK AUTOMÁTICO (slug do título) --------
+    const slug = title
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // tira acento
+      .replace(/[^a-z0-9\s-]/g, '')                    // tira símbolo
+      .trim()
+      .replace(/\s+/g, '-');                           // espaço → -
+
+    const autoLink = slug
+      ? `https://blog.btcbrave.store/${slug}.html`
+      : 'https://blog.btcbrave.store/';
+
+    linkEl.value = autoLink;
+
+    alert(`✅ Texto aplicado\n✅ Próxima imagem: ${prefix}${imgCounter}.png`);
+  });
+
+  // Botão: Gerar JSON
+  document.getElementById('generateBtn').addEventListener('click', () => {
+    let finalLink = (linkEl.value || '').trim();
+    if (!finalLink) {
+      finalLink = 'https://blog.btcbrave.store/';
+      linkEl.value = finalLink;
+    }
+
+    const obj = {
+      title:      titleEl.value.trim(),
+      description:descEl.value.trim(),
+      link:       finalLink,
+      thumbnail:  thumbEl.value.trim(),
+      pubDate:    pubDateEl.value.trim(),
+      fullText:   fullTextEl.value.trim()
+    };
+
+    let jsonStr = JSON.stringify(obj, null, 2);
+    if (commaToggle.checked) {
+      jsonStr += ',';
+    }
+
+    // 🔹 ACUMULAR JSON (não sobrescreve o que já tem)
+    if (outputJsonEl.value.trim()) {
+      outputJsonEl.value += "\n\n" + jsonStr;
+    } else {
+      outputJsonEl.value = jsonStr;
+    }
+  });
+
+  // Botão: copiar JSON
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const text = outputJsonEl.value.trim();
+    if (!text) {
+      alert('Nenhum JSON gerado ainda.');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('JSON copiado para a área de transferência!');
+    } catch (e) {
+      alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente (Ctrl+C).');
+    }
+  });
+
+  // Botão: Limpar lado esquerdo (apenas inputs/textarea)
+  clearLeftBtn.addEventListener('click', () => {
+    autoTextEl.value = '';
+    imgPrefixEl.value = '';
+    titleEl.value = '';
+    descEl.value = '';
+    linkEl.value = '';
+    thumbEl.value = '';
+    pubDateEl.value = '';
+    fullTextEl.value = '';
+    commaToggle.checked = false;
+    // JSON do lado direito permanece intacto
+  });
+</script>
+</body>
+</html>
