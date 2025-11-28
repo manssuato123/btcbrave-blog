@@ -122,26 +122,11 @@
       resize: vertical;
     }
 
-    .field-group textarea {
-      min-height: 80px;
-      max-height: 260px;
-    }
-
     .inline-fields {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
-    }
-
-    .inline-fields .field-group {
-      flex: 1 1 150px;
-    }
-
-    .hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
     }
 
     .btn-row {
@@ -173,23 +158,6 @@
       cursor: pointer;
     }
 
-    .small-btn {
-      padding: 6px 10px;
-      font-size: 11px;
-    }
-
-    .comma-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .comma-toggle input {
-      margin: 0;
-    }
-
     .output-area textarea {
       width: 100%;
       min-height: 220px;
@@ -198,9 +166,8 @@
       border-radius: 10px;
       border: 1px solid var(--border-soft);
       padding: 10px;
-      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-family: "JetBrains Mono", monospace;
       font-size: 12px;
-      resize: vertical;
       white-space: pre;
     }
   </style>
@@ -217,14 +184,11 @@
   </header>
 
   <div class="wrapper">
-    <!-- LADO ESQUERDO: FORMULÁRIO -->
+
+    <!-- FORMULÁRIO ESQUERDO -->
     <div class="card">
       <h2>Colar notícia automática (1, 2 e 3)</h2>
-      <small>
-        1 – Título<br>
-        2 – Resumo (description)<br>
-        3 – Texto completo (pode ter vários subtítulos com frases &lt;= 30 caracteres)
-      </small>
+      <small>1 – Título • 2 – Resumo • 3 – Texto completo</small>
 
       <div class="field-group" style="margin-top:10px;">
         <textarea id="autoText" placeholder="1 - Título&#10;&#10;2 - Resumo curto&#10;&#10;3 - Texto completo..."></textarea>
@@ -234,12 +198,9 @@
         <div class="field-group" style="max-width:160px;">
           <label for="imgPrefix">Image Prefix (ex: a / b / aa)</label>
           <input id="imgPrefix" type="text" value="a" maxlength="4">
-          <div class="hint">Ex: a → a1.png / b → b1.png / aa → aa1.png</div>
         </div>
         <div class="field-group" style="flex:0 0 auto; margin-top:26px;">
-          <button type="button" class="primary-btn small-btn" id="useAutoText">
-            Usar texto automaticamente
-          </button>
+          <button type="button" class="primary-btn small-btn" id="useAutoText">Usar texto automaticamente</button>
         </div>
       </div>
 
@@ -247,222 +208,171 @@
 
       <div class="field-group">
         <label for="title">Title *</label>
-        <input id="title" type="text" placeholder="Ex: BTCBRAVE launches new alert system">
+        <input id="title" type="text">
       </div>
 
       <div class="field-group">
         <label for="description">Description *</label>
-        <textarea id="description" placeholder="Resumo curto da notícia ou post."></textarea>
+        <textarea id="description"></textarea>
       </div>
 
       <div class="field-group">
         <label for="link">Link *</label>
-        https://news.btcbrave.store/?post=o-slug-do-post-aqui
-        <div class="hint">Se estiver vazio na hora de gerar, vira https://blog.btcbrave.store/</div>
+        <input id="link" type="text" placeholder="https://news.btcbrave.store/?post=slug-do-post">
       </div>
 
       <div class="field-group">
-        <label for="thumbnail">Thumbnail (URL da imagem) *</label>
-        <input id="thumbnail" type="text" placeholder="https://blog.btcbrave.store/imgs/a1.png">
-        <div class="hint">Prefixo + contador: a1.png, a2.png, a3.png…</div>
+        <label for="thumbnail">Thumbnail *</label>
+        <input id="thumbnail" type="text" placeholder="https://news.btcbrave.store/imgs/a1.png">
       </div>
 
       <div class="inline-fields">
         <div class="field-group">
           <label for="pubDate">Date (ISO) *</label>
-          <input id="pubDate" type="text" placeholder="2025-11-27T02:56:49.158Z">
+          <input id="pubDate" type="text">
         </div>
-        <div class="field-group" style="flex:0 0 auto; margin-top:24px;">
-          <button class="secondary-btn small-btn" id="nowBtn">Agora</button>
-        </div>
+        <button class="secondary-btn small-btn" id="nowBtn">Agora</button>
       </div>
 
       <div class="field-group">
         <label for="fullText">Full Text *</label>
-        <textarea id="fullText" placeholder="<p>Conteúdo completo em HTML para abrir no popup.</p>"></textarea>
-        <div class="hint">Frases ≤ 30 caracteres viram &lt;h2&gt; automaticamente, o restante vira &lt;p&gt;.</div>
+        <textarea id="fullText"></textarea>
       </div>
 
       <div class="btn-row">
         <button class="primary-btn" id="generateBtn">Gerar JSON</button>
-        <label class="comma-toggle">
-          <input type="checkbox" id="commaToggle">
-          adicionar vírgula no final
-        </label>
-        <!-- BOTÃO: LIMPAR LADO ESQUERDO -->
-        <button type="button" class="secondary-btn" id="clearLeftBtn">
-          Limpar lado esquerdo
-        </button>
+        <label><input type="checkbox" id="commaToggle"> vírgula no final</label>
+        <button type="button" class="secondary-btn" id="clearLeftBtn">Limpar lado esquerdo</button>
       </div>
     </div>
 
-    <!-- LADO DIREITO: SAÍDA -->
+    <!-- SAÍDA -->
     <div class="card output-area">
       <h2>JSON gerado</h2>
-      <small>Copie e cole este bloco dentro do seu <code>posts.json</code> ou <code>news.json</code>.</small>
-
-      <div class="btn-row" style="margin-top:8px;">
-        <button class="primary-btn" id="copyBtn">Copiar JSON</button>
-      </div>
+      <button class="primary-btn" id="copyBtn">Copiar JSON</button>
 
       <div class="field-group" style="margin-top:10px;">
-        <textarea id="outputJson" readonly placeholder='O JSON gerado aparecerá aqui...'></textarea>
+        <textarea id="outputJson" readonly placeholder='JSON aparece aqui...'></textarea>
       </div>
     </div>
   </div>
 
-  <script>
-  const autoTextEl   = document.getElementById('autoText');
-  const imgPrefixEl  = document.getElementById('imgPrefix');
+<script>
+const autoTextEl   = document.getElementById('autoText');
+const imgPrefixEl  = document.getElementById('imgPrefix');
+const titleEl      = document.getElementById('title');
+const descEl       = document.getElementById('description');
+const linkEl       = document.getElementById('link');
+const thumbEl      = document.getElementById('thumbnail');
+const pubDateEl    = document.getElementById('pubDate');
+const fullTextEl   = document.getElementById('fullText');
+const outputJsonEl = document.getElementById('outputJson');
+const commaToggle  = document.getElementById('commaToggle');
+const clearLeftBtn = document.getElementById('clearLeftBtn');
 
-  const titleEl      = document.getElementById('title');
-  const descEl       = document.getElementById('description');
-  const linkEl       = document.getElementById('link');
-  const thumbEl      = document.getElementById('thumbnail');
-  const pubDateEl    = document.getElementById('pubDate');
-  const fullTextEl   = document.getElementById('fullText');
-  const outputJsonEl = document.getElementById('outputJson');
-  const commaToggle  = document.getElementById('commaToggle');
-  const clearLeftBtn = document.getElementById('clearLeftBtn');
+let imgCounter = 1;
 
-  let imgCounter = 1;
+// Botão "Agora"
+document.getElementById('nowBtn').addEventListener('click', () => {
+  pubDateEl.value = new Date().toISOString();
+});
 
-  // Botão "Agora" – data/hora atual em ISO
-  document.getElementById('nowBtn').addEventListener('click', () => {
-    pubDateEl.value = new Date().toISOString();
-  });
+// AutoText (gera tudo automaticamente)
+document.getElementById('useAutoText').addEventListener('click', () => {
+  const raw = (autoTextEl.value || '').trim();
+  if (!raw) return alert('Cole título, resumo e texto completo.');
 
-  // Botão: usar texto automático (por parágrafos)
-  document.getElementById('useAutoText').addEventListener('click', () => {
-    const raw    = (autoTextEl.value || '').trim();
-    const prefix = (imgPrefixEl.value || 'a').trim();
+  let blocks = raw.split(/\n\s*\n+/).map(b => b.trim()).filter(b => b);
+  if (blocks.length < 3) return alert('Faltou título, resumo ou texto.');
 
-    if (!raw) {
-      alert('Cole o texto com parágrafos:\n\n1º parágrafo = título\n2º parágrafo = resumo\nDo 3º em diante = texto completo');
-      return;
-    }
+  const clean = t => t.replace(/^\d+\s+/, '').trim();
 
-    // quebra por PARÁGRAFOS (linha em branco)
-    let blocks = raw
-      .split(/\n\s*\n+/)       // separa por linhas em branco
-      .map(b => b.trim())
-      .filter(b => b.length);  // remove vazios
+  const title = clean(blocks[0]);
+  const desc  = clean(blocks[1]);
+  const body  = blocks.slice(2).map(clean);
 
-    if (blocks.length < 3) {
-      alert('Precisa ter pelo menos: título (1º parágrafo), resumo (2º) e texto completo (3º parágrafo em diante).');
-      return;
-    }
+  const html = body.map(p => `<p>${p}</p>`).join("\n\n");
 
-    // remove numeração tipo "1 ", "2 ", "3 " no começo dos parágrafos
-    const cleanBlock = (txt) => txt.replace(/^\d+\s+/, '').trim();
+  titleEl.value    = title;
+  descEl.value     = desc;
+  fullTextEl.value = html;
+  pubDateEl.value  = new Date().toISOString();
 
-    const title = cleanBlock(blocks[0] || '');
-    const desc  = cleanBlock(blocks[1] || '');
-    const bodyBlocks = blocks.slice(2).map(cleanBlock);
+  // imagem automática
+  const imgName = `${imgPrefixEl.value}${imgCounter}.png`;
+  thumbEl.value  = `https://news.btcbrave.store/imgs/${imgName}`;
+  imgCounter++;
 
-    if (!title || !desc || bodyBlocks.length === 0) {
-      alert('Verifique se o título, o resumo e o texto completo foram preenchidos corretamente.');
-      return;
-    }
+  // link automático
+  const slug = title.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s-]/g,'')
+    .trim()
+    .replace(/\s+/g,'-');
 
-    // monta HTML do texto completo: cada parágrafo → <p>
-    const html = bodyBlocks
-      .map(par => `<p>${par}</p>`)
-      .join('\n\n');
+  linkEl.value = `https://news.btcbrave.store/?post=${slug}`;
+});
 
-    // preenche campos
-    titleEl.value    = title;
-    descEl.value     = desc;
-    fullTextEl.value = html;
+// Gerar JSON
+document.getElementById('generateBtn').addEventListener('click', () => {
 
-    // -------- IMAGEM AUTOMÁTICA --------
-    const imgName = `${prefix}${imgCounter}.png`;
-    thumbEl.value = `https://blog.btcbrave.store/imgs/${imgName}`;
-    imgCounter++;
+  const title = titleEl.value.trim();
+  const desc  = descEl.value.trim();
+  const thumb = thumbEl.value.trim();
+  const date  = pubDateEl.value.trim();
+  const full  = fullTextEl.value.trim();
+  let   link  = linkEl.value.trim();
 
-    // -------- DATA AUTOMÁTICA --------
-    pubDateEl.value = new Date().toISOString();
+  if (!title || !desc || !thumb || !date || !full)
+    return alert("Preencha título, resumo, thumbnail, data e texto completo.");
 
-    // -------- LINK AUTOMÁTICO (slug do título) --------
-    const slug = title
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // tira acento
-      .replace(/[^a-z0-9\s-]/g, '')                    // tira símbolo
+  // se link estiver vazio → gerar automático
+  if (!link) {
+    const slug = title.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9\s-]/g,'')
       .trim()
-      .replace(/\s+/g, '-');                           // espaço → -
-p
-    const autoLink = slug
-      ? `https://blog.btcbrave.store/${slug}.html`
-      : 'https://blog.btcbrave.store/';
+      .replace(/\s+/g,'-');
 
-    linkEl.value = autoLink;
+    link = `https://news.btcbrave.store/?post=${slug}`;
+    linkEl.value = link;
+  }
 
-    alert(`✅ Texto aplicado\n✅ Próxima imagem: ${prefix}${imgCounter}.png`);
-  });
+  const obj = {
+    title,
+    description: desc,
+    link,
+    thumbnail: thumb,
+    pubDate: date,
+    fullText: full
+  };
 
-  // Botão: Gerar JSON
-  document.getElementById('generateBtn').addEventListener('click', () => {
-    let finalLink = (linkEl.value || '').trim();
-    if (!finalLink) {
-      finalLink = 'https://blog.btcbrave.store/';
-      linkEl.value = finalLink;
-    }
+  let json = JSON.stringify(obj, null, 2);
+  if (commaToggle.checked) json += ",";
 
-    const obj = {
-      title:      titleEl.value.trim(),
-      description:descEl.value.trim(),
-      link:       finalLink,
-      thumbnail:  thumbEl.value.trim(),
-      pubDate:    pubDateEl.value.trim(),
-      fullText:   fullTextEl.value.trim()
-    };
-    
-    if (!obj.title || !obj.description || !obj.link || !obj.thumbnail || !obj.pubDate) {
-      alert('Preencha pelo menos: Title, Description, Link, Thumbnail e pubDate.');
-      return;
-    }
+  if (outputJsonEl.value.trim())
+    outputJsonEl.value += "\n\n" + json;
+  else
+    outputJsonEl.value = json;
+});
 
-    let jsonStr = JSON.stringify(obj, null, 2);
-    if (commaToggle.checked) {
-      jsonStr += ',';
-    }
+// copiar
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(outputJsonEl.value);
+  alert("Copiado!");
+});
 
-    // 🔹 ACUMULAR JSON (não sobrescreve o que já tem)
-    if (outputJsonEl.value.trim()) {
-      outputJsonEl.value += "\n\n" + jsonStr;
-    } else {
-      outputJsonEl.value = jsonStr;
-    }
-  });
-
-  // Botão: copiar JSON
-  document.getElementById('copyBtn').addEventListener('click', async () => {
-    const text = outputJsonEl.value.trim();
-    if (!text) {
-      alert('Nenhum JSON gerado ainda.');
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('JSON copiado para a área de transferência!');
-    } catch (e) {
-      alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente (Ctrl+C).');
-    }
-  });
-
-  // Botão: Limpar lado esquerdo (apenas inputs/textarea)
-  clearLeftBtn.addEventListener('click', () => {
-    autoTextEl.value = '';
-    imgPrefixEl.value = '';
-    titleEl.value = '';
-    descEl.value = '';
-    linkEl.value = '';
-    thumbEl.value = '';
-    pubDateEl.value = '';
-    fullTextEl.value = '';
-    commaToggle.checked = false;
-    // JSON do lado direito permanece intacto
-  });
+// limpar
+clearLeftBtn.addEventListener('click', () => {
+  autoTextEl.value = "";
+  titleEl.value = "";
+  descEl.value  = "";
+  linkEl.value  = "";
+  thumbEl.value = "";
+  pubDateEl.value = "";
+  fullTextEl.value = "";
+});
 </script>
+
 </body>
 </html>
