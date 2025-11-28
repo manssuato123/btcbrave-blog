@@ -416,6 +416,11 @@
       pubDate:    pubDateEl.value.trim(),
       fullText:   fullTextEl.value.trim()
     };
+    
+    if (!obj.title || !obj.description || !obj.link || !obj.thumbnail || !obj.pubDate) {
+      alert('Preencha pelo menos: Title, Description, Link, Thumbnail e pubDate.');
+      return;
+    }
 
     let jsonStr = JSON.stringify(obj, null, 2);
     if (commaToggle.checked) {
