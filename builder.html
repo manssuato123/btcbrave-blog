@@ -223,7 +223,7 @@
 
       <div class="field-group">
         <label for="thumbnail">Thumbnail *</label>
-        <input id="thumbnail" type="text" placeholder="https://news.btcbrave.store/imgs/a1.png">
+        <input id="thumbnail" type="text" placeholder="https://blog.btcbrave.store/imgs/a1.png">
       </div>
 
       <div class="inline-fields">
@@ -300,7 +300,7 @@ document.getElementById('useAutoText').addEventListener('click', () => {
 
   // imagem automática
   const imgName = `${imgPrefixEl.value}${imgCounter}.png`;
-  thumbEl.value  = `https://news.btcbrave.store/imgs/${imgName}`;
+  thumbEl.value  = `https://blog.btcbrave.store/imgs/${imgName}`;
   imgCounter++;
 
   // link automático
@@ -310,7 +310,7 @@ document.getElementById('useAutoText').addEventListener('click', () => {
     .trim()
     .replace(/\s+/g,'-');
 
-  linkEl.value = `https://blog.btcbrave.store/?post=${slug}`;
+  linkEl.value = `https://news.btcbrave.store/?post=${slug}`;
 });
 
 // Gerar JSON
@@ -334,7 +334,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
       .trim()
       .replace(/\s+/g,'-');
 
-    link = `https://blog.btcbrave.store/?post=${slug}`;
+    link = `https://news.btcbrave.store/?post=${slug}`;
     linkEl.value = link;
   }
 
