@@ -392,7 +392,7 @@
       .replace(/\s+/g, '-');                           // espaço → -
 p
     const autoLink = slug
-      ? `https://blog.btcbrave.store/?post=${slug}.html`
+      ? `https://blog.btcbrave.store/${slug}.html`
       : 'https://blog.btcbrave.store/';
 
     linkEl.value = autoLink;
