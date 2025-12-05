@@ -111,7 +111,8 @@
     }
 
     .field-group input,
-    .field-group textarea {
+    .field-group textarea,
+    .field-group select {
       width: 100%;
       padding: 8px 10px;
       border-radius: 8px;
@@ -226,6 +227,19 @@
         <input id="thumbnail" type="text" placeholder="https://blog.btcbrave.store/imgs/a1.png">
       </div>
 
+      <!-- NOVO: SELECT DE CATEGORY -->
+      <div class="field-group">
+        <label for="category">Category</label>
+        <select id="category">
+          <option value="">(sem categoria)</option>
+          <option value="crypto">Crypto</option>
+          <option value="world">World</option>
+          <option value="games">Games</option>
+          <option value="food">Food / Cooking</option>
+          <option value="blog">Blog</option>
+        </select>
+      </div>
+
       <div class="inline-fields">
         <div class="field-group">
           <label for="pubDate">Date (ISO) *</label>
@@ -269,6 +283,7 @@ const fullTextEl   = document.getElementById('fullText');
 const outputJsonEl = document.getElementById('outputJson');
 const commaToggle  = document.getElementById('commaToggle');
 const clearLeftBtn = document.getElementById('clearLeftBtn');
+const categoryEl   = document.getElementById('category'); // NOVO
 
 let imgCounter = 1;
 
@@ -322,6 +337,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   const date  = pubDateEl.value.trim();
   const full  = fullTextEl.value.trim();
   let   link  = linkEl.value.trim();
+  const category = (categoryEl.value || "").trim(); // NOVO
 
   if (!title || !desc || !thumb || !date || !full)
     return alert("Preencha título, resumo, thumbnail, data e texto completo.");
@@ -347,6 +363,11 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     fullText: full
   };
 
+  // Só adiciona "category" se tiver escolhido alguma
+  if (category) {
+    obj.category = category;
+  }
+
   let json = JSON.stringify(obj, null, 2);
   if (commaToggle.checked) json += ",";
 
@@ -371,6 +392,7 @@ clearLeftBtn.addEventListener('click', () => {
   thumbEl.value = "";
   pubDateEl.value = "";
   fullTextEl.value = "";
+  categoryEl.value = ""; // limpa categoria também
 });
 </script>
 
