@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>English Practice V9</title>
+
+<style>
+body{
+  background:#0b0f1a;color:#fff;font-family:Arial;margin:0;padding:0;
+}
+.container{
+  width:90%;max-width:900px;
+  margin:150px auto; /* bloco mais para baixo */
+  padding:20px;background:#141827;
+  border-radius:10px;border:1px solid #333;
+}
+textarea{
+  width:100%;height:130px;background:#0d1020;color:#fff;
+  border:1px solid #333;border-radius:6px;padding:10px;resize:vertical;
+  font-size:15px;
+}
+button{
+  background:#d4af37;color:#111;font-weight:bold;padding:8px 16px;margin-top:10px;
+  border:none;border-radius:6px;font-size:15px;cursor:pointer;
+}
+button:hover{background:#ffdd70;}
+.btn2{background:#39405c;color:#fff;}
+.btn2:hover{background:#505a85;}
+#trainer{
+  display:none;margin-top:20px;background:#181c2e;padding:15px;border-radius:10px;
+}
+.header-row{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:4px;font-size:13px;
+}
+.lang-box{
+  background:#101324;border:1px solid #333;border-radius:6px;
+  padding:10px;min-height:50px;font-size:16px;
+}
+.feedback{margin-top:6px;font-size:17px;font-weight:bold;}
+.ok{color:#7cf59a;}
+.err{color:#ff8d8d;}
+img.borbo{
+  position:fixed;left:10px;top:10px;width:160px;height:160px;
+  border-radius:50%;object-fit:cover;pointer-events:none;opacity:0.95;
+}
+@media (max-width:700px){
+  .lang-grid{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<img src="borboleta.png" class="borbo">
+
+<div class="container">
+
+  <h2>English Practice</h2>
+  <p>Write phrases like: <b>Portuguese | English</b></p>
+
+  <textarea id="lista" placeholder="Example:
+Eu gosto de café | I like coffee
+Eu moro em Londres | I live in London"></textarea>
+
+  <button onclick="startTraining()">Load & Start</button>
+
+  <div id="trainer">
+
+    <p id="status" style="margin-bottom:12px;"></p>
+
+    <!-- ENGLISH FIRST -->
+    <div class="lang-grid" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+
+      <div style="flex:1;min-width:200px;">
+        <div class="header-row">
+          <span><b>English</b></span>
+          <button class="btn2" id="btnEN" type="button" onclick="toggleEN()">Hide EN</button>
+        </div>
+        <div id="enBox" class="lang-box"></div>
+      </div>
+
+      <div style="flex:1;min-width:200px;">
+        <div class="header-row">
+          <span><b>Portuguese</b></span>
+          <button class="btn2" id="btnPT" type="button" onclick="togglePT()">Hide PT</button>
+        </div>
+        <div id="ptBox" class="lang-box"></div>
+      </div>
+
+    </div>
+
+    <textarea id="answer" placeholder="Type the English translation and press ENTER..."></textarea>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+      <button class="btn2" onclick="goBack()">Back</button>
+      <button class="btn2" onclick="skip()">Skip</button>
+      <button class="btn2" onclick="showAnswer()">Show Answer</button>
+    </div>
+
+    <p id="feedback" class="feedback"></p>
+
+    <p id="finished" style="display:none;font-size:22px;color:#8affc6;margin-top:15px;">
+      🎉 Finished! All phrases completed!
+    </p>
+
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'englishPractice_phrases_v9';
+
+let phrases = [];
+let index = 0;
+let ptHidden = false;
+let enHidden = false;
+
+// Load saved phrases from localStorage on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const lista = document.getElementById('lista');
+  if (saved) {
+    lista.value = saved;
+  }
+
+  // Auto-save when typing
+  lista.addEventListener('input', () => {
+    localStorage.setItem(STORAGE_KEY, lista.value);
+  });
+});
+
+// Start Lesson
+function startTraining(){
+  const lista = document.getElementById("lista");
+  const raw = lista.value.trim().split("\n");
+  phrases = [];
+  raw.forEach(line => {
+    const p = line.split("|");
+    if (p.length === 2) {
+      phrases.push({ pt: p[0].trim(), en: p[1].trim() });
+    }
+  });
+
+  if (phrases.length === 0) {
+    alert("Use format: Portuguese | English");
+    return;
+  }
+
+  // Save current list (just to garantir)
+  localStorage.setItem(STORAGE_KEY, lista.value);
+
+  index = 0;
+  document.getElementById("trainer").style.display = "block";
+  document.getElementById("finished").style.display = "none";
+  document.getElementById("answer").disabled = false;
+
+  showCurrent();
+}
+
+// Show current phrase
+function showCurrent(){
+  const status   = document.getElementById("status");
+  const feedback = document.getElementById("feedback");
+  const ptBox    = document.getElementById("ptBox");
+  const enBox    = document.getElementById("enBox");
+  const answer   = document.getElementById("answer");
+  const finished = document.getElementById("finished");
+
+  feedback.innerHTML = "";
+  finished.style.display = "none";
+
+  if (index >= phrases.length) {
+    status.innerHTML = "✔ Completed";
+    ptBox.textContent = "-";
+    enBox.textContent = "-";
+    answer.value = "";
+    answer.disabled = true;
+    finished.style.display = "block";
+    return;
+  }
+
+  const p = phrases[index];
+  status.innerHTML = `Phrase ${index + 1} / ${phrases.length}`;
+
+  enBox.textContent = p.en;
+  ptBox.textContent = p.pt;
+
+  answer.value = "";
+  answer.placeholder = "Type the English translation and press ENTER...";
+  answer.focus();
+}
+
+// ENTER checks automatically
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && document.activeElement.id === "answer") {
+    e.preventDefault();
+    checkAnswer();
+  }
+});
+
+function checkAnswer(){
+  if (index >= phrases.length) return;
+
+  const answer   = document.getElementById("answer").value.trim().toLowerCase();
+  const correct  = phrases[index].en.trim().toLowerCase();
+  const feedback = document.getElementById("feedback");
+
+  if (!answer) return;
+
+  if (answer === correct) {
+    feedback.innerHTML = "<span class='ok'>✔ correct</span>";
+    setTimeout(() => { index++; showCurrent(); }, 600);
+  } else {
+    feedback.innerHTML = `<span class='err'>✘ wrong — correct: "${phrases[index].en}"</span>`;
+  }
+}
+
+function skip(){
+  index++;
+  showCurrent();
+}
+
+function goBack(){
+  if (index > 0) {
+    index--;
+    showCurrent();
+  }
+}
+
+function showAnswer(){
+  if (index >= phrases.length) return;
+  document.getElementById("feedback").innerHTML =
+    `<span class='ok'>💡 correct answer: "${phrases[index].en}"</span>`;
+}
+
+// Hide/Show PT / EN
+function togglePT(){
+  const box = document.getElementById("ptBox");
+  const btn = document.getElementById("btnPT");
+  ptHidden = !ptHidden;
+  box.style.visibility = ptHidden ? "hidden" : "visible";
+  btn.textContent = ptHidden ? "Show PT" : "Hide PT";
+}
+function toggleEN(){
+  const box = document.getElementById("enBox");
+  const btn = document.getElementById("btnEN");
+  enHidden = !enHidden;
+  box.style.visibility = enHidden ? "hidden" : "visible";
+  btn.textContent = enHidden ? "Show EN" : "Hide EN";
+}
+</script>
+
+</body>
+</html>
