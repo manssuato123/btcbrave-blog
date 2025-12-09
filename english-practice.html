@@ -9,7 +9,8 @@ body{
   background:#0b0f1a;color:#fff;font-family:Arial;margin:0;padding:0;
 }
 .container{
-  width:90%;max-width:900px;
+  width:90%;
+  max-width:900px;
   margin:300px auto; /* bloco mais para baixo */
   padding:20px;background:#141827;
   border-radius:10px;border:1px solid #333;
@@ -49,7 +50,6 @@ img.borbo{
 }
 </style>
 </head>
-<body>
 <body>
  
 <img src="imgs/borboleta.png" class="borbo" alt="borboleta">
@@ -96,6 +96,31 @@ Eu moro em Londres | I live in London"></textarea>
       <button class="btn2" onclick="goBack()">Back</button>
       <button class="btn2" onclick="skip()">Skip</button>
       <button class="btn2" onclick="showAnswer()">Show Answer</button>
+
+      <!-- 🔊 BOTÕES DE ÁUDIO -->
+      <button class="btn2" type="button" onclick="playEN()">🔊 Play English (UK)</button>
+      <button class="btn2" type="button" onclick="playPT()">🔊 Play Portuguese</button>
+    </div>
+
+    <!-- CONTROLES DE VELOCIDADE -->
+    <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:15px;align-items:center;">
+      <div>
+        <label for="rateEN">Speed EN:</label><br>
+        <input type="range" id="rateEN" min="0.6" max="1.4" step="0.05" value="0.95"
+               oninput="updateRateEN(this.value)">
+        <div style="font-size:13px;margin-top:2px;">
+          <span id="rateENVal">0.95x</span>
+        </div>
+      </div>
+
+      <div>
+        <label for="ratePT">Speed PT:</label><br>
+        <input type="range" id="ratePT" min="0.6" max="1.4" step="0.05" value="1.0"
+               oninput="updateRatePT(this.value)">
+        <div style="font-size:13px;margin-top:2px;">
+          <span id="ratePTVal">1.0x</span>
+        </div>
+      </div>
     </div>
 
     <p id="feedback" class="feedback"></p>
@@ -114,6 +139,82 @@ let phrases = [];
 let index = 0;
 let ptHidden = false;
 let enHidden = false;
+
+// velocidades (podem ser mudadas no slider)
+let speechRateEN = 0.95;
+let speechRatePT = 1.0;
+
+// ---------- AUDIO (com foco em inglês britânico) ----------
+function speak(text, mode){
+  if (!('speechSynthesis' in window)) {
+    alert("Seu navegador não suporta áudio automático (speechSynthesis).");
+    return;
+  }
+
+  const utter = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+
+  let chosenVoice = null;
+
+  if (mode === 'en') {
+    // tenta achar en-GB (British English)
+    chosenVoice =
+      voices.find(v => v.lang === 'en-GB') ||
+      voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+
+    utter.lang = chosenVoice ? chosenVoice.lang : 'en-GB';
+    utter.rate = speechRateEN;  // usa controle do slider
+    utter.pitch = 1.0;
+  } else if (mode === 'pt') {
+    chosenVoice =
+      voices.find(v => v.lang === 'pt-BR') ||
+      voices.find(v => v.lang === 'pt-PT') ||
+      voices.find(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
+
+    utter.lang = chosenVoice ? chosenVoice.lang : 'pt-BR';
+    utter.rate = speechRatePT;  // usa controle do slider
+    utter.pitch = 1.0;
+  }
+
+  if (chosenVoice) {
+    utter.voice = chosenVoice;
+  }
+
+  utter.volume = 1;
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+function playEN(){
+  if (index >= phrases.length) return;
+  const p = phrases[index];
+  if (!p || !p.en) return;
+  speak(p.en, 'en');
+}
+
+function playPT(){
+  if (index >= phrases.length) return;
+  const p = phrases[index];
+  if (!p || !p.pt) return;
+  speak(p.pt, 'pt');
+}
+
+// atualizar valores da velocidade pelos sliders
+function updateRateEN(val){
+  speechRateEN = parseFloat(val);
+  document.getElementById('rateENVal').textContent = val + 'x';
+}
+function updateRatePT(val){
+  speechRatePT = parseFloat(val);
+  document.getElementById('ratePTVal').textContent = val + 'x';
+}
+
+// Força carregamento de vozes em alguns navegadores
+window.speechSynthesis.onvoiceschanged = () => {
+  window.speechSynthesis.getVoices();
+};
+// ----------------------------------------------------------
 
 // Load saved phrases from localStorage on page load
 window.addEventListener('DOMContentLoaded', () => {
@@ -146,7 +247,7 @@ function startTraining(){
     return;
   }
 
-  // Save current list (just to garantir)
+  // Save current list
   localStorage.setItem(STORAGE_KEY, lista.value);
 
   index = 0;
