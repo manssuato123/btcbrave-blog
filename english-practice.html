@@ -57,11 +57,11 @@ img.borbo{
 <div class="container">
 
   <h2>English Practice</h2>
-  <p>Write phrases like: <b>Portuguese | English</b></p>
+  <p>Write phrases like: <b>Other language | English</b></p>
 
   <textarea id="lista" placeholder="Example:
-Eu gosto de café | I like coffee
-Eu moro em Londres | I live in London"></textarea>
+Io amo il caffè | I love coffee
+Je vis à Londres | I live in London"></textarea>
 
   <button onclick="startTraining()">Load & Start</button>
 
@@ -69,12 +69,12 @@ Eu moro em Londres | I live in London"></textarea>
 
     <p id="status" style="margin-bottom:12px;"></p>
 
-    <!-- ENGLISH FIRST -->
+    <!-- ENGLISH + OTHER -->
     <div class="lang-grid" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
 
       <div style="flex:1;min-width:200px;">
         <div class="header-row">
-          <span><b>English</b></span>
+          <span><b>English (UK)</b></span>
           <button class="btn2" id="btnEN" type="button" onclick="toggleEN()">Hide EN</button>
         </div>
         <div id="enBox" class="lang-box"></div>
@@ -82,8 +82,8 @@ Eu moro em Londres | I live in London"></textarea>
 
       <div style="flex:1;min-width:200px;">
         <div class="header-row">
-          <span><b>Portuguese</b></span>
-          <button class="btn2" id="btnPT" type="button" onclick="togglePT()">Hide PT</button>
+          <span><b>Other language</b></span>
+          <button class="btn2" id="btnPT" type="button" onclick="togglePT()">Hide</button>
         </div>
         <div id="ptBox" class="lang-box"></div>
       </div>
@@ -99,13 +99,40 @@ Eu moro em Londres | I live in London"></textarea>
 
       <!-- 🔊 BOTÕES DE ÁUDIO -->
       <button class="btn2" type="button" onclick="playEN()">🔊 Play English (UK)</button>
-      <button class="btn2" type="button" onclick="playPT()">🔊 Play Portuguese</button>
+      <button class="btn2" type="button" onclick="playOther()">🔊 Play other language</button>
+    </div>
+
+    <!-- 📌 Seleção de idioma da TRADUÇÃO -->
+    <div style="margin-top:12px;">
+      <label style="font-size:14px;">Language of "Other":</label><br>
+      <select id="voiceLang"
+              style="margin-top:4px;padding:6px;border-radius:6px;"
+              onchange="onChangeLang(this.value)">
+        <!-- Portuguese -->
+        <option value="pt-BR">🇧🇷 Portuguese BR</option>
+        <option value="pt-PT">🇵🇹 Portuguese PT</option>
+
+        <!-- European -->
+        <option value="it-IT" selected>🇮🇹 Italian (default)</option>
+        <option value="fr-FR">🇫🇷 French</option>
+        <option value="es-ES">🇪🇸 Spanish</option>
+        <option value="de-DE">🇩🇪 German</option>
+        <option value="ro-RO">🇷🇴 Romanian</option>
+
+        <!-- Asia / Middle East -->
+        <option value="hi-IN">🇮🇳 Hindi / Indian</option>
+        <option value="ar-SA">🇸🇦 Arabic</option>
+        <option value="ja-JP">🇯🇵 Japanese</option>
+      </select>
+      <div style="font-size:12px;color:#aaa;margin-top:4px;">
+        English voice is always UK. This dropdown is for the "Other language" column.
+      </div>
     </div>
 
     <!-- CONTROLES DE VELOCIDADE -->
     <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:15px;align-items:center;">
       <div>
-        <label for="rateEN">Speed EN:</label><br>
+        <label for="rateEN">Speed English (UK):</label><br>
         <input type="range" id="rateEN" min="0.6" max="1.4" step="0.05" value="0.95"
                oninput="updateRateEN(this.value)">
         <div style="font-size:13px;margin-top:2px;">
@@ -114,11 +141,11 @@ Eu moro em Londres | I live in London"></textarea>
       </div>
 
       <div>
-        <label for="ratePT">Speed PT:</label><br>
-        <input type="range" id="ratePT" min="0.6" max="1.4" step="0.05" value="1.0"
-               oninput="updateRatePT(this.value)">
+        <label for="rateOther">Speed Other language:</label><br>
+        <input type="range" id="rateOther" min="0.6" max="1.4" step="0.05" value="1.0"
+               oninput="updateRateOther(this.value)">
         <div style="font-size:13px;margin-top:2px;">
-          <span id="ratePTVal">1.0x</span>
+          <span id="rateOtherVal">1.0x</span>
         </div>
       </div>
     </div>
@@ -140,12 +167,19 @@ let index = 0;
 let ptHidden = false;
 let enHidden = false;
 
-// velocidades (podem ser mudadas no slider)
-let speechRateEN = 0.95;
-let speechRatePT = 1.0;
+// velocidades
+let speechRateEN = 0.95;    // inglês UK
+let speechRateOther = 1.0;  // outro idioma
 
-// ---------- AUDIO (com foco em inglês britânico) ----------
-function speak(text, mode){
+// idioma da coluna "Other"
+let selectedLang = 'it-IT'; // padrão: italiano
+
+// ---- AUDIO / TEXT-TO-SPEECH ----
+function onChangeLang(lang){
+  selectedLang = lang;
+}
+
+function speak(text, lang, rate){
   if (!('speechSynthesis' in window)) {
     alert("Seu navegador não suporta áudio automático (speechSynthesis).");
     return;
@@ -154,32 +188,19 @@ function speak(text, mode){
   const utter = new SpeechSynthesisUtterance(text);
   const voices = window.speechSynthesis.getVoices();
 
-  let chosenVoice = null;
+  let voice =
+    voices.find(v => v.lang === lang) ||
+    voices.find(v => v.lang && v.lang.toLowerCase().startsWith(lang.split('-')[0].toLowerCase()));
 
-  if (mode === 'en') {
-    // tenta achar en-GB (British English)
-    chosenVoice =
-      voices.find(v => v.lang === 'en-GB') ||
-      voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-
-    utter.lang = chosenVoice ? chosenVoice.lang : 'en-GB';
-    utter.rate = speechRateEN;  // usa controle do slider
-    utter.pitch = 1.0;
-  } else if (mode === 'pt') {
-    chosenVoice =
-      voices.find(v => v.lang === 'pt-BR') ||
-      voices.find(v => v.lang === 'pt-PT') ||
-      voices.find(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
-
-    utter.lang = chosenVoice ? chosenVoice.lang : 'pt-BR';
-    utter.rate = speechRatePT;  // usa controle do slider
-    utter.pitch = 1.0;
+  if (voice) {
+    utter.voice = voice;
+    utter.lang = voice.lang;
+  } else {
+    utter.lang = lang;
   }
 
-  if (chosenVoice) {
-    utter.voice = chosenVoice;
-  }
-
+  utter.rate = rate;
+  utter.pitch = 1;
   utter.volume = 1;
 
   window.speechSynthesis.cancel();
@@ -190,31 +211,32 @@ function playEN(){
   if (index >= phrases.length) return;
   const p = phrases[index];
   if (!p || !p.en) return;
-  speak(p.en, 'en');
+  // inglês sempre UK
+  speak(p.en, 'en-GB', speechRateEN);
 }
 
-function playPT(){
+function playOther(){
   if (index >= phrases.length) return;
   const p = phrases[index];
   if (!p || !p.pt) return;
-  speak(p.pt, 'pt');
+  // usa idioma escolhido no select
+  speak(p.pt, selectedLang, speechRateOther);
 }
 
-// atualizar valores da velocidade pelos sliders
 function updateRateEN(val){
   speechRateEN = parseFloat(val);
   document.getElementById('rateENVal').textContent = val + 'x';
 }
-function updateRatePT(val){
-  speechRatePT = parseFloat(val);
-  document.getElementById('ratePTVal').textContent = val + 'x';
+function updateRateOther(val){
+  speechRateOther = parseFloat(val);
+  document.getElementById('rateOtherVal').textContent = val + 'x';
 }
 
 // Força carregamento de vozes em alguns navegadores
 window.speechSynthesis.onvoiceschanged = () => {
   window.speechSynthesis.getVoices();
 };
-// ----------------------------------------------------------
+// ------------------------------
 
 // Load saved phrases from localStorage on page load
 window.addEventListener('DOMContentLoaded', () => {
@@ -224,7 +246,9 @@ window.addEventListener('DOMContentLoaded', () => {
     lista.value = saved;
   }
 
-  // Auto-save when typing
+  const sel = document.getElementById('voiceLang');
+  if (sel) selectedLang = sel.value;
+
   lista.addEventListener('input', () => {
     localStorage.setItem(STORAGE_KEY, lista.value);
   });
@@ -238,16 +262,16 @@ function startTraining(){
   raw.forEach(line => {
     const p = line.split("|");
     if (p.length === 2) {
+      // p[0] = other language, p[1] = English
       phrases.push({ pt: p[0].trim(), en: p[1].trim() });
     }
   });
 
   if (phrases.length === 0) {
-    alert("Use format: Portuguese | English");
+    alert("Use format: Other language | English");
     return;
   }
 
-  // Save current list
   localStorage.setItem(STORAGE_KEY, lista.value);
 
   index = 0;
@@ -283,8 +307,8 @@ function showCurrent(){
   const p = phrases[index];
   status.innerHTML = `Phrase ${index + 1} / ${phrases.length}`;
 
-  enBox.textContent = p.en;
-  ptBox.textContent = p.pt;
+  enBox.textContent = p.en;  // English
+  ptBox.textContent = p.pt;  // Other language
 
   answer.value = "";
   answer.placeholder = "Type the English translation and press ENTER...";
@@ -334,13 +358,13 @@ function showAnswer(){
     `<span class='ok'>💡 correct answer: "${phrases[index].en}"</span>`;
 }
 
-// Hide/Show PT / EN
+// Hide/Show
 function togglePT(){
   const box = document.getElementById("ptBox");
   const btn = document.getElementById("btnPT");
   ptHidden = !ptHidden;
   box.style.visibility = ptHidden ? "hidden" : "visible";
-  btn.textContent = ptHidden ? "Show PT" : "Hide PT";
+  btn.textContent = ptHidden ? "Show" : "Hide";
 }
 function toggleEN(){
   const box = document.getElementById("enBox");
