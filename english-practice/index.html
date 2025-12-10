@@ -167,7 +167,7 @@ img.borbo{
 <div class="container">
 
 <h2>Language Practice</h2>
-<p>Write phrases like: <b>Language 1 | Language 2</b></p>
+<p>Write phrases like: <b>Language 1 | your language 2</b></p>
 
 <textarea id="lista" placeholder="Example:
 Io amo il caffè | I love coffee
@@ -178,11 +178,11 @@ Je vis à Londres | I live in London"></textarea>
   <div class="model-box-title">Prompt model for ChatGPT</div>
   <small>Copy, paste into ChatGPT and replace the text after <b>TEXT:</b></small>
 
-  <p style="margin:6px 0 4px;">Language 2 → Language 1</p>
+  <p style="margin:6px 0 4px;">Language 1 → Language 2</p>
   <textarea id="promptL2L1" readonly>
 Take the text below, split it into short sentences, translate each part, and return everything in the format:
 
-Language 2 | Language 1
+ Language 1 | Language 2
 
 Ready for me to paste into my training app.
 
@@ -190,7 +190,7 @@ TEXT:
   </textarea>
 
   <div class="model-buttons">
-    <button type="button" onclick="copyPrompt('promptL2L1')">Copy Language 2 → 1</button>
+    <button type="button" onclick="copyPrompt('promptL2L1')">Copy Language 1 → 2</button>
   </div>
 </div>
 
@@ -259,6 +259,8 @@ TEXT:
     <button class="btn2" onclick="showAnswer()">Show Answer</button>
     <button class="btn2" onclick="playEN()">🔊 Language 1</button>
     <button class="btn2" onclick="playOther()">🔊 Language 2</button>
+    <!-- BOTÃO DE MODO: DIGITAR L1 OU L2 -->
+    <button class="btn2" id="modeBtn" onclick="toggleTargetSide()">✏️ Type L2 (Language 2)</button>
   </div>
 
   <div style="margin-top:10px;display:flex;gap:15px;flex-wrap:wrap;">
@@ -296,6 +298,9 @@ let speechRateOther  = 1.0;   // Language 2
 
 let leftLang  = 'en-GB'; // padrão L1
 let rightLang = 'pt-BR'; // padrão L2
+
+// alvo da resposta: 'right' = Language 2 (padrão), 'left' = Language 1
+let targetSide = 'right';
 
 function saveSettings(){
   const data = {
@@ -416,6 +421,8 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
   }catch(e){}
+
+  updateTargetSideUI();
 });
 
 // Inicia treino
@@ -425,7 +432,7 @@ function startTraining(){
 
   const raw = lista.value.trim();
   if (!raw){
-    alert("Write phrases like: Language 1 | Language 2");
+    alert("Write phrases like:\nLanguage 1 | Your Language 2");
     return;
   }
 
@@ -496,7 +503,11 @@ function checkAnswer(){
   if (!answerEl) return;
 
   const user = answerEl.value.trim().toLowerCase();
-  const correct = (phrases[index].right || "").trim().toLowerCase();
+  const correctBase = (targetSide === 'right')
+    ? (phrases[index].right || "")
+    : (phrases[index].left  || "");
+
+  const correct = correctBase.trim().toLowerCase();
 
   if (!user) return;
 
@@ -504,7 +515,7 @@ function checkAnswer(){
     feedback.innerHTML = "<span class='ok'>✔ correct</span>";
     setTimeout(() => { index++; showCurrent(); }, 600);
   } else {
-    feedback.innerHTML = `<span class='err'>✘ wrong — correct: "${phrases[index].right}"</span>`;
+    feedback.innerHTML = `<span class='err'>✘ wrong — correct: "${correctBase}"</span>`;
   }
 }
 
@@ -523,7 +534,12 @@ function goBack(){
 function showAnswer(){
   const feedback = document.getElementById("feedback");
   if (!feedback) return;
-  feedback.innerHTML = `<span class='ok'>💡 correct answer: "${phrases[index].right}"</span>`;
+
+  const correctBase = (targetSide === 'right')
+    ? (phrases[index].right || "")
+    : (phrases[index].left  || "");
+
+  feedback.innerHTML = `<span class='ok'>💡 correct answer: "${correctBase}"</span>`;
 }
 
 function togglePT(){
@@ -540,6 +556,26 @@ function toggleEN(){
   enHidden  = !enHidden;
   box.style.visibility = enHidden ? "hidden" : "visible";
   btn.textContent      = enHidden ? "Show L1" : "Hide L1";
+}
+
+/* 🔁 TROCAR MODO: DIGITAR L1 OU L2 */
+function toggleTargetSide(){
+  targetSide = (targetSide === 'right') ? 'left' : 'right';
+  updateTargetSideUI();
+}
+
+function updateTargetSideUI(){
+  const btn = document.getElementById('modeBtn');
+  const answer = document.getElementById('answer');
+  if (!btn || !answer) return;
+
+  if (targetSide === 'right'){
+    btn.textContent = '✏️ Type L2 (Language 2)';
+    answer.placeholder = 'Type the Language 2 sentence and press ENTER...';
+  } else {
+    btn.textContent = '✏️ Type L1 (Language 1)';
+    answer.placeholder = 'Type the Language 1 sentence and press ENTER...';
+  }
 }
 
 /* COPIAR PROMPTS */
