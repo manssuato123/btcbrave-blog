@@ -11,7 +11,7 @@ body{
 .container{
   width:90%;
   max-width:900px;
-  margin:300px auto; /* bloco mais para baixo */
+  margin:300px auto;
   padding:20px;background:#141827;
   border-radius:10px;border:1px solid #333;
 }
@@ -48,227 +48,306 @@ img.borbo{
 @media (max-width:700px){
   .lang-grid{flex-direction:column;}
 }
+
+/* SUBSCRIBE POPUP E SININHO (igual NEWS) */
+.btcbrave-login-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.75);
+  display:none;align-items:center;justify-content:center;z-index:9999;
+}
+.btcbrave-login-card{
+  background:#ffffff;color:#111827;width:100%;max-width:420px;border-radius:8px;
+  padding:28px 30px 24px;box-shadow:0 25px 60px rgba(0,0,0,0.5);position:relative;
+}
+.btcbrave-login-close{
+  position:absolute;top:10px;right:12px;border:none;background:none;font-size:18px;cursor:pointer;
+}
+.btcbrave-login-title{
+  margin:0 0 8px;font-size:20px;font-weight:700;text-align:center;
+}
+.btcbrave-login-subtitle{
+  margin:0 0 18px;font-size:13px;text-align:center;color:#4b5563;
+}
+.btcbrave-login-footnote{text-align:center;color:#6b7280;font-size:11px;margin-top:8px;}
+#floating-subscribe{
+  position:absolute;right:25px;top:25px;width:30px;height:30px;background:#fff;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;color:#000;z-index:10000;box-shadow:0 5px 15px rgba(0,0,0,0.6);
+}
 </style>
 </head>
 <body>
- 
-<img src="imgs/borboleta.png" class="borbo" alt="borboleta">
 
-<div class="container">
+<!-- 🔔 SININHO + POPUP -->
+<iframe name="hiddenBrevoFrame" style="display:none;"></iframe>
 
-  <h2>English Practice</h2>
-  <p>Write phrases like: <b>Other language | English</b></p>
+<div id="btcbraveLoginOverlay" class="btcbrave-login-overlay">
+  <div class="btcbrave-login-card">
+    <button id="btcbraveLoginClose" class="btcbrave-login-close">×</button>
 
-  <textarea id="lista" placeholder="Example:
-Io amo il caffè | I love coffee
-Je vis à Londres | I live in London"></textarea>
+    <h2 class="btcbrave-login-title">Join English Updates</h2>
+    <p class="btcbrave-login-subtitle">Get English practice in your email.</p>
 
-  <button onclick="startTraining()">Load & Start</button>
+    <form id="btcbraveLoginForm"
+      action="https://2c3bfeb6.sibforms.com/serve/MUIFAKgSltnznFnj2zjaw4q0uanLuPr2YkDp8mCKOGx7h6wryGbcOg1E9mFahRvBm-kOBCKJOtMy9KAr8gMRb5wpQ6inGj09IQ58wRykX6PTnBjKQa7BQbWUIMTEIc54CEooAtFJHCiYZsoGRvag8I6YxWeVxSqiv_dCO4fEwcbslj8RbwoeIRN9V_5L3R8BiSU8D_unfJRG8BsjcA=="
+      method="POST" target="hiddenBrevoFrame">
 
-  <div id="trainer">
+      <input type="email" id="btcbraveLoginEmail" name="EMAIL"
+        placeholder="Enter your email" required
+        style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;font-size:14px;">
 
-    <p id="status" style="margin-bottom:12px;"></p>
+      <button type="submit"
+        style="width:100%;margin-top:10px;padding:10px;border-radius:999px;border:none;
+        background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f97316);
+        color:#fff;font-size:14px;font-weight:700;cursor:pointer;">
+        Continue
+      </button>
+    </form>
 
-    <!-- ENGLISH + OTHER -->
-    <div class="lang-grid" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-
-      <div style="flex:1;min-width:200px;">
-        <div class="header-row">
-          <span><b>English (UK)</b></span>
-          <button class="btn2" id="btnEN" type="button" onclick="toggleEN()">Hide EN</button>
-        </div>
-        <div id="enBox" class="lang-box"></div>
-      </div>
-
-      <div style="flex:1;min-width:200px;">
-        <div class="header-row">
-          <span><b>Other language</b></span>
-          <button class="btn2" id="btnPT" type="button" onclick="togglePT()">Hide</button>
-        </div>
-        <div id="ptBox" class="lang-box"></div>
-      </div>
-
-    </div>
-
-    <textarea id="answer" placeholder="Type the English translation and press ENTER..."></textarea>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-      <button class="btn2" onclick="goBack()">Back</button>
-      <button class="btn2" onclick="skip()">Skip</button>
-      <button class="btn2" onclick="showAnswer()">Show Answer</button>
-
-      <!-- 🔊 BOTÕES DE ÁUDIO -->
-      <button class="btn2" type="button" onclick="playEN()">🔊 Play English (UK)</button>
-      <button class="btn2" type="button" onclick="playOther()">🔊 Play other language</button>
-    </div>
-
-    <!-- 📌 Seleção de idioma da TRADUÇÃO -->
-    <div style="margin-top:12px;">
-      <label style="font-size:14px;">Language of "Other":</label><br>
-      <select id="voiceLang"
-              style="margin-top:4px;padding:6px;border-radius:6px;"
-              onchange="onChangeLang(this.value)">
-        <!-- Portuguese -->
-        <option value="pt-BR">🇧🇷 Portuguese BR</option>
-        <option value="pt-PT">🇵🇹 Portuguese PT</option>
-
-        <!-- European -->
-        <option value="it-IT" selected>🇮🇹 Italian (default)</option>
-        <option value="fr-FR">🇫🇷 French</option>
-        <option value="es-ES">🇪🇸 Spanish</option>
-        <option value="de-DE">🇩🇪 German</option>
-        <option value="ro-RO">🇷🇴 Romanian</option>
-
-        <!-- Asia / Middle East -->
-        <option value="hi-IN">🇮🇳 Hindi / Indian</option>
-        <option value="ar-SA">🇸🇦 Arabic</option>
-        <option value="ja-JP">🇯🇵 Japanese</option>
-      </select>
-      <div style="font-size:12px;color:#aaa;margin-top:4px;">
-        English voice is always UK. This dropdown is for the "Other language" column.
-      </div>
-    </div>
-
-    <!-- CONTROLES DE VELOCIDADE -->
-    <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:15px;align-items:center;">
-      <div>
-        <label for="rateEN">Speed English (UK):</label><br>
-        <input type="range" id="rateEN" min="0.6" max="1.4" step="0.05" value="0.95"
-               oninput="updateRateEN(this.value)">
-        <div style="font-size:13px;margin-top:2px;">
-          <span id="rateENVal">0.95x</span>
-        </div>
-      </div>
-
-      <div>
-        <label for="rateOther">Speed Other language:</label><br>
-        <input type="range" id="rateOther" min="0.6" max="1.4" step="0.05" value="1.0"
-               oninput="updateRateOther(this.value)">
-        <div style="font-size:13px;margin-top:2px;">
-          <span id="rateOtherVal">1.0x</span>
-        </div>
-      </div>
-    </div>
-
-    <p id="feedback" class="feedback"></p>
-
-    <p id="finished" style="display:none;font-size:22px;color:#8affc6;margin-top:15px;">
-      🎉 Finished! All phrases completed!
-    </p>
-
+    <p class="btcbrave-login-footnote">No spam — unsubscribe anytime.</p>
   </div>
 </div>
 
+<div id="floating-subscribe">🔔</div>
+<!-- 🔥 FIM subscribe -->
+
+<img src="imgs/borboleta.png" class="borbo">
+
+<div class="container">
+
+<h2>English Practice</h2>
+<p>Write phrases like: <b>Other language | English</b></p>
+
+<textarea id="lista" placeholder="Example:
+Io amo il caffè | I love coffee
+Je vis à Londres | I live in London"></textarea>
+
+<button onclick="startTraining()">Load & Start</button>
+
+<div id="trainer">
+  <p id="status" style="margin-bottom:12px;"></p>
+
+  <div class="lang-grid" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+
+    <div style="flex:1;min-width:200px;">
+      <div class="header-row">
+        <span><b>English (UK)</b></span>
+        <button class="btn2" id="btnEN" onclick="toggleEN()">Hide EN</button>
+      </div>
+      <div id="enBox" class="lang-box"></div>
+    </div>
+
+    <div style="flex:1;min-width:200px;">
+      <div class="header-row">
+        <span><b>Other language</b></span>
+        <button class="btn2" id="btnPT" onclick="togglePT()">Hide</button>
+      </div>
+      <div id="ptBox" class="lang-box"></div>
+    </div>
+
+  </div>
+
+  <textarea id="answer" placeholder="Type the English translation and press ENTER..."></textarea>
+
+  <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+    <button class="btn2" onclick="goBack()">Back</button>
+    <button class="btn2" onclick="skip()">Skip</button>
+    <button class="btn2" onclick="showAnswer()">Show Answer</button>
+    <button class="btn2" onclick="playEN()">🔊 English</button>
+    <button class="btn2" onclick="playOther()">🔊 Other</button>
+  </div>
+
+  <div style="margin-top:12px;">
+    <label>Language of OTHER:</label><br>
+    <select id="voiceLang" onchange="onChangeLang(this.value)" style="padding:6px;border-radius:6px;">
+      <option value="it-IT" selected>🇮🇹 Italian</option>
+      <option value="pt-BR">🇧🇷 Portuguese</option>
+      <option value="es-ES">🇪🇸 Spanish</option>
+      <option value="fr-FR">🇫🇷 French</option>
+      <option value="de-DE">🇩🇪 German</option>
+      <option value="ro-RO">🇷🇴 Romanian</option>
+      <option value="hi-IN">🇮🇳 Hindi</option>
+      <option value="ar-SA">🇸🇦 Arabic</option>
+      <option value="ja-JP">🇯🇵 Japanese</option>
+    </select>
+  </div>
+
+  <div style="margin-top:10px;display:flex;gap:15px;">
+    <div>
+      Speed EN:<br>
+      <input type="range" id="rateEN" min="0.6" max="1.4" step="0.05" value="0.95" oninput="updateRateEN(this.value)">
+      <span id="rateENVal">0.95x</span>
+    </div>
+    <div>
+      Speed Other:<br>
+      <input type="range" id="rateOther" min="0.6" max="1.4" step="0.05" value="1.0" oninput="updateRateOther(this.value)">
+      <span id="rateOtherVal">1.0x</span>
+    </div>
+  </div>
+
+  <p id="feedback"></p>
+  <p id="finished" style="display:none;font-size:22px;color:#8affc6;margin-top:15px;">🎉 Finished!</p>
+
+</div>
+</div>
+
+<!-- 🔁 SCRIPT DO TREINO – COM IDIOMA + VELOCIDADE SALVOS -->
 <script>
-const STORAGE_KEY = 'englishPractice_phrases_v9';
+/* --- SCRIPT DO TREINO COM MEMÓRIA DE CONFIGURAÇÕES --- */
+const STORAGE_KEY  = 'englishPractice_phrases_v9';
+const SETTINGS_KEY = 'englishPractice_settings_v1';
 
 let phrases = [];
 let index = 0;
 let ptHidden = false;
 let enHidden = false;
 
-// velocidades
-let speechRateEN = 0.95;    // inglês UK
-let speechRateOther = 1.0;  // outro idioma
+let speechRateEN     = 0.95;
+let speechRateOther  = 1.0;
+let selectedLang     = 'it-IT'; // padrão
 
-// idioma da coluna "Other"
-let selectedLang = 'it-IT'; // padrão: italiano
+function saveSettings(){
+  const data = {
+    lang:      selectedLang,
+    rateEN:    speechRateEN,
+    rateOther: speechRateOther
+  };
+  try{
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
+  }catch(e){}
+}
 
-// ---- AUDIO / TEXT-TO-SPEECH ----
-function onChangeLang(lang){
-  selectedLang = lang;
+function onChangeLang(code){
+  selectedLang = code;
+  const sel = document.getElementById('voiceLang');
+  if (sel) sel.value = code;
+  saveSettings();
+}
+
+function setLang(code){
+  // pode usar em botões tipo Italian / Portuguese
+  selectedLang = code;
+  const sel = document.getElementById('voiceLang');
+  if (sel) sel.value = code;
+  saveSettings();
 }
 
 function speak(text, lang, rate){
-  if (!('speechSynthesis' in window)) {
-    alert("Seu navegador não suporta áudio automático (speechSynthesis).");
-    return;
-  }
-
   const utter = new SpeechSynthesisUtterance(text);
-  const voices = window.speechSynthesis.getVoices();
-
-  let voice =
-    voices.find(v => v.lang === lang) ||
-    voices.find(v => v.lang && v.lang.toLowerCase().startsWith(lang.split('-')[0].toLowerCase()));
-
-  if (voice) {
-    utter.voice = voice;
-    utter.lang = voice.lang;
+  const voices = speechSynthesis.getVoices();
+  const v = voices.find(a => a.lang === lang) ||
+            voices.find(a => a.lang && a.lang.startsWith(lang.split('-')[0]));
+  if (v){
+    utter.voice = v;
+    utter.lang  = v.lang;
   } else {
     utter.lang = lang;
   }
-
   utter.rate = rate;
-  utter.pitch = 1;
-  utter.volume = 1;
-
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utter);
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
 }
 
 function playEN(){
-  if (index >= phrases.length) return;
-  const p = phrases[index];
-  if (!p || !p.en) return;
-  // inglês sempre UK
-  speak(p.en, 'en-GB', speechRateEN);
+  if (index < phrases.length){
+    speak(phrases[index].en, 'en-GB', speechRateEN);
+  }
 }
 
 function playOther(){
-  if (index >= phrases.length) return;
-  const p = phrases[index];
-  if (!p || !p.pt) return;
-  // usa idioma escolhido no select
-  speak(p.pt, selectedLang, speechRateOther);
+  if (index < phrases.length){
+    speak(phrases[index].pt, selectedLang, speechRateOther);
+  }
 }
 
 function updateRateEN(val){
   speechRateEN = parseFloat(val);
-  document.getElementById('rateENVal').textContent = val + 'x';
+  const span = document.getElementById('rateENVal');
+  if (span) span.textContent = val + 'x';
+  saveSettings();
 }
+
 function updateRateOther(val){
   speechRateOther = parseFloat(val);
-  document.getElementById('rateOtherVal').textContent = val + 'x';
+  const span = document.getElementById('rateOtherVal');
+  if (span) span.textContent = val + 'x';
+  saveSettings();
 }
 
-// Força carregamento de vozes em alguns navegadores
-window.speechSynthesis.onvoiceschanged = () => {
-  window.speechSynthesis.getVoices();
-};
-// ------------------------------
+// carrega vozes
+speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
 
-// Load saved phrases from localStorage on page load
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem(STORAGE_KEY);
   const lista = document.getElementById('lista');
-  if (saved) {
+  const sel   = document.getElementById('voiceLang');
+  const rateENInput    = document.getElementById('rateEN');
+  const rateOtherInput = document.getElementById('rateOther');
+  const rateENValSpan  = document.getElementById('rateENVal');
+  const rateOtherValSpan = document.getElementById('rateOtherVal');
+
+  // Frases salvas
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved && lista){
     lista.value = saved;
   }
+  if (lista){
+    lista.addEventListener('input', () => {
+      localStorage.setItem(STORAGE_KEY, lista.value);
+    });
+  }
 
-  const sel = document.getElementById('voiceLang');
-  if (sel) selectedLang = sel.value;
+  // Configurações salvas (idioma + velocidades)
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw){
+      const cfg = JSON.parse(raw);
 
-  lista.addEventListener('input', () => {
-    localStorage.setItem(STORAGE_KEY, lista.value);
-  });
+      if (cfg.lang){
+        selectedLang = cfg.lang;
+        if (sel) sel.value = cfg.lang;
+      } else if (sel){
+        // se não tinha salvo, mantém padrão
+        selectedLang = sel.value;
+      }
+
+      if (typeof cfg.rateEN === 'number' && rateENInput){
+        speechRateEN = cfg.rateEN;
+        rateENInput.value = cfg.rateEN;
+        if (rateENValSpan) rateENValSpan.textContent = cfg.rateEN + 'x';
+      }
+
+      if (typeof cfg.rateOther === 'number' && rateOtherInput){
+        speechRateOther = cfg.rateOther;
+        rateOtherInput.value = cfg.rateOther;
+        if (rateOtherValSpan) rateOtherValSpan.textContent = cfg.rateOther + 'x';
+      }
+    } else {
+      // primeira vez: sincroniza selectedLang com select
+      if (sel){
+        selectedLang = sel.value;
+      }
+    }
+  }catch(e){
+    if (sel) selectedLang = sel.value;
+  }
 });
 
-// Start Lesson
+// Inicia treino
 function startTraining(){
   const lista = document.getElementById("lista");
-  const raw = lista.value.trim().split("\n");
+  if (!lista) return;
+
+  const rawLines = lista.value.trim().split("\n");
   phrases = [];
-  raw.forEach(line => {
+
+  rawLines.forEach(line => {
     const p = line.split("|");
-    if (p.length === 2) {
-      // p[0] = other language, p[1] = English
+    if (p.length === 2){
       phrases.push({ pt: p[0].trim(), en: p[1].trim() });
     }
   });
 
-  if (phrases.length === 0) {
-    alert("Use format: Other language | English");
+  if (!phrases.length){
+    alert("Use: Other language | English");
     return;
   }
 
@@ -282,7 +361,6 @@ function startTraining(){
   showCurrent();
 }
 
-// Show current phrase
 function showCurrent(){
   const status   = document.getElementById("status");
   const feedback = document.getElementById("feedback");
@@ -291,48 +369,45 @@ function showCurrent(){
   const answer   = document.getElementById("answer");
   const finished = document.getElementById("finished");
 
-  feedback.innerHTML = "";
+  feedback.textContent = "";
   finished.style.display = "none";
 
-  if (index >= phrases.length) {
-    status.innerHTML = "✔ Completed";
-    ptBox.textContent = "-";
-    enBox.textContent = "-";
-    answer.value = "";
-    answer.disabled = true;
+  if (index >= phrases.length){
+    status.textContent = "✔ Completed";
+    enBox.textContent  = "-";
+    ptBox.textContent  = "-";
+    answer.value       = "";
+    answer.disabled    = true;
     finished.style.display = "block";
     return;
   }
 
-  const p = phrases[index];
-  status.innerHTML = `Phrase ${index + 1} / ${phrases.length}`;
-
-  enBox.textContent = p.en;  // English
-  ptBox.textContent = p.pt;  // Other language
+  status.textContent = `Phrase ${index + 1} / ${phrases.length}`;
+  enBox.textContent  = phrases[index].en;
+  ptBox.textContent  = phrases[index].pt;
 
   answer.value = "";
-  answer.placeholder = "Type the English translation and press ENTER...";
   answer.focus();
 }
 
-// ENTER checks automatically
 document.addEventListener("keydown", e => {
-  if (e.key === "Enter" && document.activeElement.id === "answer") {
+  if (e.key === "Enter" && document.activeElement.id === "answer"){
     e.preventDefault();
     checkAnswer();
   }
 });
 
 function checkAnswer(){
-  if (index >= phrases.length) return;
-
-  const answer   = document.getElementById("answer").value.trim().toLowerCase();
-  const correct  = phrases[index].en.trim().toLowerCase();
+  const answerEl = document.getElementById("answer");
   const feedback = document.getElementById("feedback");
+  if (!answerEl) return;
 
-  if (!answer) return;
+  const user = answerEl.value.trim().toLowerCase();
+  const correct = (phrases[index].en || "").trim().toLowerCase();
 
-  if (answer === correct) {
+  if (!user) return;
+
+  if (user === correct){
     feedback.innerHTML = "<span class='ok'>✔ correct</span>";
     setTimeout(() => { index++; showCurrent(); }, 600);
   } else {
@@ -346,33 +421,93 @@ function skip(){
 }
 
 function goBack(){
-  if (index > 0) {
+  if (index > 0){
     index--;
     showCurrent();
   }
 }
 
 function showAnswer(){
-  if (index >= phrases.length) return;
-  document.getElementById("feedback").innerHTML =
-    `<span class='ok'>💡 correct answer: "${phrases[index].en}"</span>`;
+  const feedback = document.getElementById("feedback");
+  if (!feedback) return;
+  feedback.innerHTML = `<span class='ok'>💡 correct answer: "${phrases[index].en}"</span>`;
 }
 
-// Hide/Show
 function togglePT(){
   const box = document.getElementById("ptBox");
   const btn = document.getElementById("btnPT");
-  ptHidden = !ptHidden;
+  ptHidden  = !ptHidden;
   box.style.visibility = ptHidden ? "hidden" : "visible";
-  btn.textContent = ptHidden ? "Show" : "Hide";
+  btn.textContent      = ptHidden ? "Show" : "Hide";
 }
+
 function toggleEN(){
   const box = document.getElementById("enBox");
   const btn = document.getElementById("btnEN");
-  enHidden = !enHidden;
+  enHidden  = !enHidden;
   box.style.visibility = enHidden ? "hidden" : "visible";
-  btn.textContent = enHidden ? "Show EN" : "Hide EN";
+  btn.textContent      = enHidden ? "Show EN" : "Hide EN";
 }
+</script>
+
+<!-- 🔥 SCRIPT SUBSCRIBE IGUAL NEWS COM UNSUBSCRIBE -->
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+
+  let overlay=document.getElementById('btcbraveLoginOverlay'),
+      btn=document.getElementById('floating-subscribe'),
+      close=document.getElementById('btcbraveLoginClose'),
+      form=document.getElementById('btcbraveLoginForm'),
+      email=document.getElementById('btcbraveLoginEmail');
+
+  function open(){overlay.style.display='flex'}
+  function closeNow(){overlay.style.display='none'}
+
+  // ====== CONTROLE DE ESTADO DO SININHO ======
+  function updateBell(){
+    if(localStorage.getItem('englishSubscribed')){
+      btn.innerHTML="🔕";
+      btn.style.background="#00c853";  // verde quando inscrito
+    } else {
+      btn.innerHTML="🔔";
+      btn.style.background="#fff";
+    }
+  }
+  updateBell();
+
+  // ====== AUTO-POPUP NA PRIMEIRA VEZ ======
+  if(!localStorage.getItem('englishSubscribed')){
+    setTimeout(open,1500);
+  }
+
+  // ====== CLIQUE NO SININHO ======
+  btn.onclick=function(){
+    if(localStorage.getItem('englishSubscribed')){
+      if(confirm("You are subscribed.\nDo you want to unsubscribe?")){
+        localStorage.removeItem('englishSubscribed');
+        updateBell();
+        alert("Unsubscribed successfully.");
+      }
+      return;
+    }
+    open();
+  };
+
+  // ====== FECHAR POPUP ======
+  close.onclick=closeNow;
+  overlay.onclick=e=>{if(e.target===overlay)closeNow();}
+
+  // ====== FORM SUBMIT ======
+  form.onsubmit=function(){
+    localStorage.setItem('englishSubscribed','true');
+    setTimeout(()=>{
+      alert("Subscribed successfully!");
+      closeNow();
+      updateBell();
+    },700);
+  }
+
+});
 </script>
 
 </body>
