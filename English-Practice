@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>English Practice V9</title>
+<title>Language Practice V9</title>
 
 <style>
 body{
@@ -53,6 +53,46 @@ img.borbo{
   .lang-grid{flex-direction:column;}
 }
 
+/* BOX DE MODELO PARA CHATGPT */
+.model-box{
+  margin-top:12px;
+  background:#101324;
+  border:1px dashed #444;
+  border-radius:8px;
+  padding:10px;
+  font-size:13px;
+}
+.model-box-title{
+  font-weight:bold;
+  margin-bottom:6px;
+  font-size:13px;
+}
+.model-box small{
+  color:#9ca3af;
+}
+.model-box textarea{
+  width:100%;
+  height:100px;
+  background:#050814;
+  color:#fff;
+  border-radius:6px;
+  border:1px solid #333;
+  padding:8px;
+  resize:vertical;
+  font-size:12px;
+}
+.model-buttons{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:6px;
+}
+.model-buttons button{
+  padding:6px 10px;
+  font-size:12px;
+  margin-top:0;
+}
+
 /* SUBSCRIBE POPUP E SININHO (igual NEWS) */
 .btcbrave-login-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.75);
@@ -96,8 +136,8 @@ img.borbo{
   <div class="btcbrave-login-card">
     <button id="btcbraveLoginClose" class="btcbrave-login-close">×</button>
 
-    <h2 class="btcbrave-login-title">Join English Updates</h2>
-    <p class="btcbrave-login-subtitle">Get English practice in your email.</p>
+    <h2 class="btcbrave-login-title">Join Language Updates</h2>
+    <p class="btcbrave-login-subtitle">Get practice phrases in your email.</p>
 
     <form id="btcbraveLoginForm"
       action="https://2c3bfeb6.sibforms.com/serve/MUIFAKgSltnznFnj2zjaw4q0uanLuPr2YkDp8mCKOGx7h6wryGbcOg1E9mFahRvBm-kOBCKJOtMy9KAr8gMRb5wpQ6inGj09IQ58wRykX6PTnBjKQa7BQbWUIMTEIc54CEooAtFJHCiYZsoGRvag8I6YxWeVxSqiv_dCO4fEwcbslj8RbwoeIRN9V_5L3R8BiSU8D_unfJRG8BsjcA=="
@@ -126,12 +166,33 @@ img.borbo{
 
 <div class="container">
 
-<h2>English Practice</h2>
-<p>Write phrases like: <b>Left language | Right language</b></p>
+<h2>Language Practice</h2>
+<p>Write phrases like: <b>Language 1 | Language 2</b></p>
 
 <textarea id="lista" placeholder="Example:
 Io amo il caffè | I love coffee
 Je vis à Londres | I live in London"></textarea>
+
+<!-- 📌 BOX DE MODELO PARA CHATGPT -->
+<div class="model-box">
+  <div class="model-box-title">Prompt model for ChatGPT</div>
+  <small>Copy, paste into ChatGPT and replace the text after <b>TEXT:</b></small>
+
+  <p style="margin:6px 0 4px;">Language 2 → Language 1</p>
+  <textarea id="promptL2L1" readonly>
+Take the text below, split it into short sentences, translate each part, and return everything in the format:
+
+Language 2 | Language 1
+
+Ready for me to paste into my training app.
+
+TEXT:
+  </textarea>
+
+  <div class="model-buttons">
+    <button type="button" onclick="copyPrompt('promptL2L1')">Copy Language 2 → 1</button>
+  </div>
+</div>
 
 <button onclick="startTraining()">Load & Start</button>
 
@@ -140,11 +201,11 @@ Je vis à Londres | I live in London"></textarea>
 
   <div class="lang-grid" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
 
-    <!-- LADO ESQUERDO -->
+    <!-- LADO IDIOMA 1 -->
     <div style="flex:1;min-width:200px;">
       <div class="header-row">
         <div class="header-row-left">
-          <span><b id="labelLeft">English (UK)</b></span>
+          <span><b>Language 1</b></span>
           <select id="voiceLangLeft" class="select-mini" onchange="onChangeLangLeft(this.value)">
             <option value="en-GB" selected>English (UK)</option>
             <option value="en-US">English (US)</option>
@@ -159,16 +220,16 @@ Je vis à Londres | I live in London"></textarea>
             <option value="ja-JP">日本語</option>
           </select>
         </div>
-        <button class="btn2" id="btnEN" onclick="toggleEN()">Hide EN</button>
+        <button class="btn2" id="btnEN" onclick="toggleEN()">Hide L1</button>
       </div>
       <div id="enBox" class="lang-box"></div>
     </div>
 
-    <!-- LADO DIREITO -->
+    <!-- LADO IDIOMA 2 -->
     <div style="flex:1;min-width:200px;">
       <div class="header-row">
         <div class="header-row-right">
-          <span><b id="labelRight">Other language</b></span>
+          <span><b>Language 2</b></span>
           <select id="voiceLang" class="select-mini" onchange="onChangeLangRight(this.value)">
             <option value="it-IT">Italiano</option>
             <option value="pt-BR" selected>Português (BR)</option>
@@ -177,37 +238,37 @@ Je vis à Londres | I live in London"></textarea>
             <option value="de-DE">Deutsch</option>
             <option value="ro-RO">Română</option>
             <option value="hi-IN">Hindi</option>
-            <option value="ar-SA">العربية</option>
-            <option value="ja-JP">日本語</option>
+            <option value="ar-SA">Arabic</option>
+            <option value="ja-JP">Japanese</option>
             <option value="en-GB">English (UK)</option>
             <option value="en-US">English (US)</option>
           </select>
         </div>
-        <button class="btn2" id="btnPT" onclick="togglePT()">Hide</button>
+        <button class="btn2" id="btnPT" onclick="togglePT()">Hide L2</button>
       </div>
       <div id="ptBox" class="lang-box"></div>
     </div>
 
   </div>
 
-  <textarea id="answer" placeholder="Type the RIGHT side sentence and press ENTER..."></textarea>
+  <textarea id="answer" placeholder="Type the Language 2 sentence and press ENTER..."></textarea>
 
   <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
     <button class="btn2" onclick="goBack()">Back</button>
     <button class="btn2" onclick="skip()">Skip</button>
     <button class="btn2" onclick="showAnswer()">Show Answer</button>
-    <button class="btn2" onclick="playEN()">🔊 Left</button>
-    <button class="btn2" onclick="playOther()">🔊 Right</button>
+    <button class="btn2" onclick="playEN()">🔊 Language 1</button>
+    <button class="btn2" onclick="playOther()">🔊 Language 2</button>
   </div>
 
   <div style="margin-top:10px;display:flex;gap:15px;flex-wrap:wrap;">
     <div>
-      Speed Left:<br>
+      Speed L1:<br>
       <input type="range" id="rateEN" min="0.6" max="1.4" step="0.05" value="0.95" oninput="updateRateEN(this.value)">
       <span id="rateENVal">0.95x</span>
     </div>
     <div>
-      Speed Right:<br>
+      Speed L2:<br>
       <input type="range" id="rateOther" min="0.6" max="1.4" step="0.05" value="1.0" oninput="updateRateOther(this.value)">
       <span id="rateOtherVal">1.0x</span>
     </div>
@@ -230,11 +291,11 @@ let index = 0;
 let ptHidden = false;
 let enHidden = false;
 
-let speechRateEN     = 0.95;  // lado esquerdo
-let speechRateOther  = 1.0;   // lado direito
+let speechRateEN     = 0.95;  // Language 1
+let speechRateOther  = 1.0;   // Language 2
 
-let leftLang  = 'en-GB'; // padrão lado esquerdo
-let rightLang = 'pt-BR'; // padrão lado direito
+let leftLang  = 'en-GB'; // padrão L1
+let rightLang = 'pt-BR'; // padrão L2
 
 function saveSettings(){
   const data = {
@@ -248,27 +309,10 @@ function saveSettings(){
   }catch(e){}
 }
 
-function refreshLabels(){
-  const selL = document.getElementById('voiceLangLeft');
-  const selR = document.getElementById('voiceLang');
-  const lblL = document.getElementById('labelLeft');
-  const lblR = document.getElementById('labelRight');
-
-  if (selL && lblL){
-    const optL = selL.options[selL.selectedIndex];
-    lblL.textContent = optL ? optL.text : 'Left language';
-  }
-  if (selR && lblR){
-    const optR = selR.options[selR.selectedIndex];
-    lblR.textContent = optR ? optR.text : 'Right language';
-  }
-}
-
 function onChangeLangLeft(code){
   leftLang = code;
   const sel = document.getElementById('voiceLangLeft');
   if (sel) sel.value = code;
-  refreshLabels();
   saveSettings();
 }
 
@@ -276,7 +320,6 @@ function onChangeLangRight(code){
   rightLang = code;
   const sel = document.getElementById('voiceLang');
   if (sel) sel.value = code;
-  refreshLabels();
   saveSettings();
 }
 
@@ -373,8 +416,6 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
   }catch(e){}
-
-  refreshLabels();
 });
 
 // Inicia treino
@@ -384,7 +425,7 @@ function startTraining(){
 
   const raw = lista.value.trim();
   if (!raw){
-    alert("Write phrases like: Left language | Right language");
+    alert("Write phrases like: Language 1 | Language 2");
     return;
   }
 
@@ -399,7 +440,7 @@ function startTraining(){
   });
 
   if (!phrases.length){
-    alert("Use: Left text | Right text");
+    alert("Use: Language 1 text | Language 2 text");
     return;
   }
 
@@ -490,7 +531,7 @@ function togglePT(){
   const btn = document.getElementById("btnPT");
   ptHidden  = !ptHidden;
   box.style.visibility = ptHidden ? "hidden" : "visible";
-  btn.textContent      = ptHidden ? "Show" : "Hide";
+  btn.textContent      = ptHidden ? "Show L2" : "Hide L2";
 }
 
 function toggleEN(){
@@ -498,7 +539,31 @@ function toggleEN(){
   const btn = document.getElementById("btnEN");
   enHidden  = !enHidden;
   box.style.visibility = enHidden ? "hidden" : "visible";
-  btn.textContent      = enHidden ? "Show Left" : "Hide Left";
+  btn.textContent      = enHidden ? "Show L1" : "Hide L1";
+}
+
+/* COPIAR PROMPTS */
+function copyPrompt(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const text = el.value;
+
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      alert("Prompt copied!");
+    }).catch(()=>{
+      fallbackCopy(el);
+    });
+  } else {
+    fallbackCopy(el);
+  }
+}
+
+function fallbackCopy(el){
+  el.select();
+  el.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  alert("Prompt copied!");
 }
 </script>
 
@@ -518,7 +583,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // ====== CONTROLE DE ESTADO DO SININHO ======
   function updateBell(){
     if(localStorage.getItem('englishSubscribed')){
-      btn.innerHTML="🔕";
+      btn.innerHTML="🔔";
       btn.style.background="#00c853";  // verde quando inscrito
     } else {
       btn.innerHTML="🔔";
