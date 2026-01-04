@@ -497,19 +497,33 @@ document.addEventListener("keydown", e => {
   }
 });
 
+/* ✅ FIX: normalização para reconhecer ' e ’ como iguais + espaços/pontuação final */
+function normalizeForCompare(str){
+  return (str || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .trim()
+    .replace(/[’‘´`]/g, "'")        // apóstrofos diferentes -> '
+    .replace(/[“”]/g, '"')          // aspas diferentes -> "
+    .replace(/\s+/g, " ")           // espaços múltiplos
+    .replace(/^[“"']+|[”"']+$/g, "")// tira aspas no começo/fim
+    .replace(/[.!?…]+$/g, "");      // ignora pontuação final (remove se quiser exigir ponto)
+}
+
 function checkAnswer(){
   const answerEl = document.getElementById("answer");
   const feedback = document.getElementById("feedback");
   if (!answerEl) return;
 
-  const user = answerEl.value.trim().toLowerCase();
+  const userRaw = answerEl.value;
+  if (!userRaw.trim()) return;
+
   const correctBase = (targetSide === 'right')
     ? (phrases[index].right || "")
     : (phrases[index].left  || "");
 
-  const correct = correctBase.trim().toLowerCase();
-
-  if (!user) return;
+  const user = normalizeForCompare(userRaw);
+  const correct = normalizeForCompare(correctBase);
 
   if (user === correct){
     feedback.innerHTML = "<span class='ok'>✔ correct</span>";
