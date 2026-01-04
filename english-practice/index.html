@@ -285,8 +285,10 @@ TEXT:
 <!-- 🔁 SCRIPT DO TREINO – MEMÓRIA + DOIS LADOS -->
 <script>
 /* --- SCRIPT DO TREINO COM MEMÓRIA DE CONFIGURAÇÕES --- */
-const STORAGE_KEY  = 'englishPractice_phrases_v9';
-const SETTINGS_KEY = 'englishPractice_settings_v2';
+const STORAGE_KEY   = 'englishPractice_phrases_v9';
+const SETTINGS_KEY  = 'englishPractice_settings_v2';
+const PROGRESS_KEY  = 'englishPractice_progress_v1';
+const TARGETSIDE_KEY= 'englishPractice_targetSide_v1';
 
 let phrases = [];
 let index = 0;
@@ -312,6 +314,44 @@ function saveSettings(){
   try{
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
   }catch(e){}
+}
+
+function hashText(str){
+  // hash simples e estável (pra saber se a lista mudou)
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(16);
+}
+
+function saveProgress(rawText){
+  try{
+    const payload = {
+      hash: hashText(rawText || ''),
+      index: index,
+      ts: Date.now()
+    };
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(payload));
+  }catch(e){}
+}
+
+function loadProgress(rawText){
+  try{
+    const saved = localStorage.getItem(PROGRESS_KEY);
+    if (!saved) return 0;
+    const obj = JSON.parse(saved);
+    if (!obj || typeof obj.index !== 'number' || !obj.hash) return 0;
+
+    const currentHash = hashText(rawText || '');
+    if (obj.hash !== currentHash) return 0;
+
+    if (obj.index < 0) return 0;
+    return obj.index;
+  }catch(e){
+    return 0;
+  }
 }
 
 function onChangeLangLeft(code){
@@ -382,7 +422,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const rateENValSpan    = document.getElementById('rateENVal');
   const rateOtherValSpan = document.getElementById('rateOtherVal');
 
-    // Frases salvas
+  // Frases salvas
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved && lista){
     lista.value = saved;
@@ -393,14 +433,19 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Modo salvo (Type L1/L2)
+  try{
+    const savedSide = localStorage.getItem(TARGETSIDE_KEY);
+    if (savedSide === 'left' || savedSide === 'right'){
+      targetSide = savedSide;
+    }
+  }catch(e){}
+
   // Configurações salvas
   try{
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw){
       const cfg = JSON.parse(raw);
-      if (cfg.targetSide === 'left' || cfg.targetSide === 'right'){
-        targetSide = cfg.targetSide;   // ✅ ADICIONAR ISTO
-      }
 
       if (cfg.leftLang && selL){
         leftLang = cfg.leftLang;
@@ -410,7 +455,6 @@ window.addEventListener('DOMContentLoaded', () => {
         rightLang = cfg.rightLang;
         selR.value = rightLang;
       }
-
 
       if (typeof cfg.rateEN === 'number' && rateENInput){
         speechRateEN = cfg.rateEN;
@@ -457,12 +501,16 @@ function startTraining(){
 
   localStorage.setItem(STORAGE_KEY, lista.value);
 
-  index = 0;
+  // ✅ restaura onde parou (se a lista for a mesma)
+  const savedIndex = loadProgress(raw);
+  index = (savedIndex >= 0 && savedIndex < phrases.length) ? savedIndex : 0;
+
   document.getElementById("trainer").style.display = "block";
   document.getElementById("finished").style.display = "none";
   document.getElementById("answer").disabled = false;
 
   showCurrent();
+  updateTargetSideUI();
 }
 
 function showCurrent(){
@@ -492,6 +540,10 @@ function showCurrent(){
 
   answer.value = "";
   answer.focus();
+
+  // ✅ salva posição sempre que mostrar a frase
+  const lista = document.getElementById("lista");
+  if (lista) saveProgress(lista.value.trim());
 }
 
 document.addEventListener("keydown", e => {
@@ -507,11 +559,11 @@ function normalizeForCompare(str){
     .normalize("NFKC")
     .toLowerCase()
     .trim()
-    .replace(/[’‘´`]/g, "'")        // apóstrofos diferentes -> '
-    .replace(/[“”]/g, '"')          // aspas diferentes -> "
-    .replace(/\s+/g, " ")           // espaços múltiplos
-    .replace(/^[“"']+|[”"']+$/g, "")// tira aspas no começo/fim
-    .replace(/[.!?…]+$/g, "");      // ignora pontuação final (remove se quiser exigir ponto)
+    .replace(/[’‘´`]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, " ")
+    .replace(/^[“"']+|[”"']+$/g, "")
+    .replace(/[.!?…]+$/g, "");
 }
 
 function checkAnswer(){
@@ -531,7 +583,10 @@ function checkAnswer(){
 
   if (user === correct){
     feedback.innerHTML = "<span class='ok'>✔ correct</span>";
-    setTimeout(() => { index++; showCurrent(); }, 600);
+    setTimeout(() => {
+      index++;
+      showCurrent();
+    }, 600);
   } else {
     feedback.innerHTML = `<span class='err'>✘ wrong — correct: "${correctBase}"</span>`;
   }
@@ -579,6 +634,7 @@ function toggleEN(){
 /* 🔁 TROCAR MODO: DIGITAR L1 OU L2 */
 function toggleTargetSide(){
   targetSide = (targetSide === 'right') ? 'left' : 'right';
+  try{ localStorage.setItem(TARGETSIDE_KEY, targetSide); }catch(e){}
   updateTargetSideUI();
 }
 
@@ -638,7 +694,7 @@ document.addEventListener('DOMContentLoaded',function(){
   function updateBell(){
     if(localStorage.getItem('englishSubscribed')){
       btn.innerHTML="🔔";
-      btn.style.background="#00c853";  // verde quando inscrito
+      btn.style.background="#00c853";
     } else {
       btn.innerHTML="🔔";
       btn.style.background="#fff";
