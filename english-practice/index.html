@@ -382,7 +382,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const rateENValSpan    = document.getElementById('rateENVal');
   const rateOtherValSpan = document.getElementById('rateOtherVal');
 
-  // Frases salvas
+    // Frases salvas
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved && lista){
     lista.value = saved;
@@ -398,6 +398,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw){
       const cfg = JSON.parse(raw);
+      if (cfg.targetSide === 'left' || cfg.targetSide === 'right'){
+        targetSide = cfg.targetSide;   // ✅ ADICIONAR ISTO
+      }
 
       if (cfg.leftLang && selL){
         leftLang = cfg.leftLang;
@@ -407,6 +410,7 @@ window.addEventListener('DOMContentLoaded', () => {
         rightLang = cfg.rightLang;
         selR.value = rightLang;
       }
+
 
       if (typeof cfg.rateEN === 'number' && rateENInput){
         speechRateEN = cfg.rateEN;
