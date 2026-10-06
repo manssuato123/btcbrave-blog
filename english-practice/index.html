@@ -14,7 +14,7 @@
 
 <link
   rel="stylesheet"
-  href="styles.css?v=5"
+  href="styles.css?v=6"
 >
 
 <link
@@ -1642,7 +1642,7 @@ header{
      APP ORIGINAL
      ====================================================== -->
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 
 
 
@@ -3302,6 +3302,13 @@ function prepareTrainingStart(){
   setTimeout(()=>{
 
     if(trainPage?.classList.contains("hidden")){
+      /* Em um celular/navegador novo ainda não existe material no localStorage.
+         Nesse caso, não deixa a tela vazia: abre Meu material para a pessoa
+         carregar/organizar o material. Quando o material padrão for embutido,
+         o START passará direto para o treino normalmente. */
+      setupPage?.classList.remove("hidden");
+      settingsPage?.classList.add("hidden");
+      window.scrollTo({top:0,behavior:"auto"});
       return;
     }
 
@@ -3440,7 +3447,7 @@ if(
       navigator
         .serviceWorker
         .register(
-          "./sw.js?v=5",
+          "./sw.js?v=6",
           {
             updateViaCache:
               "none"
