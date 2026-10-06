@@ -206,6 +206,19 @@ body.start-open #floating-subscribe{
   gap:14px;
 }
 
+.header-butterfly{
+  width:78px;
+  height:78px;
+  object-fit:contain;
+  flex:0 0 auto;
+}
+
+.header-title-block{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
 #backToStart{
   display:none !important;
   border-radius:999px;
@@ -622,7 +635,12 @@ body.start-open #floating-subscribe{
   .header-left{
     width:100%;
 
-    align-items:flex-start;
+    align-items:center;
+  }
+
+  .header-butterfly{
+    width:60px;
+    height:60px;
   }
 
 
@@ -898,7 +916,14 @@ header{
     </button>
 
 
-    <div>
+    <img
+      src="borboleta.png"
+      class="header-butterfly"
+      alt="Borboleta"
+    >
+
+
+    <div class="header-title-block">
 
       <h1>
         English Practice
