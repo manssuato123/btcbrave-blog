@@ -1,1 +1,10 @@
-
+{
+  "name": "English Practice",
+  "short_name": "English",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#efe4cf",
+  "theme_color": "#8c5d32",
+  "lang": "pt-BR"
+}
