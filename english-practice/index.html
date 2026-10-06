@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 
 <head>
+
 <meta charset="utf-8">
 
 <meta
@@ -9,11 +10,11 @@
   content="width=device-width,initial-scale=1"
 >
 
-<title>English Practice</title>
+<title>English Practice Memory</title>
 
 <link
   rel="stylesheet"
-  href="styles.css?v=3"
+  href="styles.css?v=4"
 >
 
 <link
@@ -38,21 +39,20 @@
 
 <meta
   name="apple-mobile-web-app-title"
-  content="English Practice"
+  content="English Practice Memory"
 >
 
 
 <style>
 
 /* =========================================================
-   TELA DE ABERTURA
+   TELA 1 - CAPA
    ========================================================= */
 
 #startScreen{
   position:fixed;
   inset:0;
   z-index:99999;
-
   background:#000;
 
   display:flex;
@@ -62,12 +62,10 @@
   overflow:auto;
 }
 
-
 .start-cover{
   position:relative;
 
   width:min(100%,900px);
-
   min-height:100vh;
 
   display:flex;
@@ -76,7 +74,6 @@
 
   background:#000;
 }
-
 
 .start-cover img{
   display:block;
@@ -90,7 +87,7 @@
 }
 
 
-/* TEXTO DOS IDIOMAS */
+/* IDIOMA VERDE DA CAPA */
 
 .start-language{
   position:absolute;
@@ -107,7 +104,7 @@
   border:2px solid #39ff14;
   border-radius:14px;
 
-  background:rgba(0,20,0,.80);
+  background:rgba(0,20,0,.88);
 
   color:#39ff14;
 
@@ -129,7 +126,6 @@
     opacity .35s ease,
     transform .35s ease;
 }
-
 
 .start-language.hide{
   opacity:0;
@@ -156,7 +152,7 @@
 
   padding:14px 28px;
 
-  background:rgba(255,255,255,.95);
+  background:rgba(255,255,255,.96);
 
   color:#118a00;
 
@@ -175,7 +171,6 @@
     box-shadow .2s ease;
 }
 
-
 #startCoverBtn:hover{
   transform:scale(1.05);
 
@@ -184,22 +179,424 @@
     0 0 35px rgba(57,255,20,.75);
 }
 
-
 #startCoverBtn:active{
   transform:scale(.97);
 }
 
 
-/* ESCONDER A PÁGINA NORMAL
-   ENQUANTO A CAPA ESTIVER ABERTA */
+/* ESCONDE SITE ENQUANTO CAPA ESTÁ ABERTA */
 
 body.start-open > header,
 body.start-open > main{
   display:none;
 }
 
+body.start-open #floating-subscribe{
+  display:none;
+}
 
-/* CELULAR */
+
+/* =========================================================
+   BOTÃO VOLTAR PARA START
+   ========================================================= */
+
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+#backToStart{
+  border-radius:999px;
+
+  background:#fffaf0;
+
+  white-space:nowrap;
+}
+
+
+/* =========================================================
+   MATERIAL
+   ========================================================= */
+
+/* botão começar continua existindo para o app.js,
+   mas não aparece para a pessoa */
+
+.compat-hidden{
+  display:none !important;
+}
+
+
+/* =========================================================
+   TELA DE TREINO
+   ========================================================= */
+
+/* MATERIAL VERDE */
+
+#back{
+  background:#279b52 !important;
+  color:#fff !important;
+
+  border-color:#1f7e42 !important;
+
+  border-radius:12px !important;
+}
+
+
+/* MOSTRAR DE NOVO MAIS REDONDO */
+
+#replay{
+  border-radius:999px !important;
+
+  padding-left:18px !important;
+  padding-right:18px !important;
+}
+
+
+/* =========================================================
+   CONFIGURAÇÕES
+   ========================================================= */
+
+/*
+  O app.js antigo adiciona "hidden" nas configurações.
+  Aqui forçamos a configuração a continuar aparecendo
+  enquanto a tela de treino estiver aberta.
+*/
+
+#train:not(.hidden) #settings{
+  display:block !important;
+}
+
+
+/* menu ☰ e X continuam no HTML somente para não quebrar app.js */
+
+#menu,
+#closeMenu{
+  display:none !important;
+}
+
+
+.settings-top{
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:16px;
+
+  margin:14px 0;
+}
+
+
+.language-settings{
+  margin-top:18px;
+
+  padding-top:16px;
+
+  border-top:1px solid #e0cfb7;
+}
+
+.language-row{
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+}
+
+.language-row select{
+  flex:1;
+}
+
+#saveLanguage{
+  white-space:nowrap;
+
+  background:#279b52;
+
+  color:#fff;
+
+  border-color:#1f7e42;
+}
+
+
+/* =========================================================
+   PRÉVIA DO TAMANHO DA LETRA
+   ========================================================= */
+
+.font-preview-card{
+  margin-top:18px;
+
+  padding:18px;
+
+  border:1px solid #d6c2a4;
+
+  border-radius:16px;
+
+  background:#fff9ed;
+
+  text-align:center;
+}
+
+.font-preview-title{
+  font-weight:800;
+
+  margin-bottom:10px;
+}
+
+#fontPreview{
+  min-height:110px;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:10px;
+
+  overflow:hidden;
+
+  font-weight:900;
+
+  line-height:1;
+
+  transition:font-size .15s ease;
+}
+
+.font-size-buttons{
+  justify-content:center !important;
+
+  margin-top:10px;
+}
+
+
+/* =========================================================
+   BOTÕES DE NÍVEL / PAUSAR
+   ========================================================= */
+
+/*
+  Você pediu para tirar Nível anterior / Pausar /
+  Próximo nível da parte de baixo.
+
+  Continuam escondidos no HTML para o app.js antigo
+  não dar erro. Depois retiramos também do app.js.
+*/
+
+.smallcontrols{
+  display:none !important;
+}
+
+
+/* =========================================================
+   CADASTRO / SININHO
+   ========================================================= */
+
+#floating-subscribe{
+  position:fixed;
+
+  right:18px;
+  bottom:18px;
+
+  width:54px;
+  height:54px;
+
+  z-index:20000;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:2px solid #cdbda6;
+  border-radius:50%;
+
+  background:#fffaf0;
+
+  font-size:25px;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.20);
+}
+
+#subscribeCheck{
+  position:absolute;
+
+  right:-3px;
+  top:-5px;
+
+  width:22px;
+  height:22px;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+
+  background:#18a84b;
+
+  color:#fff;
+
+  font-size:14px;
+
+  font-weight:900;
+
+  border:2px solid #fff;
+}
+
+
+@keyframes bellShake{
+
+  0%{
+    transform:rotate(0deg);
+  }
+
+  15%{
+    transform:rotate(14deg);
+  }
+
+  30%{
+    transform:rotate(-14deg);
+  }
+
+  45%{
+    transform:rotate(10deg);
+  }
+
+  60%{
+    transform:rotate(-10deg);
+  }
+
+  75%{
+    transform:rotate(5deg);
+  }
+
+  100%{
+    transform:rotate(0deg);
+  }
+
+}
+
+.bell-shake{
+  animation:bellShake .8s ease-in-out;
+}
+
+
+/* POPUP */
+
+.btcbrave-login-overlay{
+  position:fixed;
+
+  inset:0;
+
+  z-index:30000;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+
+  background:rgba(0,0,0,.70);
+}
+
+.btcbrave-login-card{
+  position:relative;
+
+  width:100%;
+  max-width:430px;
+
+  padding:28px;
+
+  border-radius:18px;
+
+  background:#fffaf0;
+
+  color:#171511;
+
+  box-shadow:
+    0 25px 70px rgba(0,0,0,.45);
+}
+
+.btcbrave-login-close{
+  position:absolute;
+
+  right:12px;
+  top:10px;
+
+  border:0;
+
+  background:transparent;
+
+  font-size:26px;
+
+  cursor:pointer;
+}
+
+.btcbrave-login-title{
+  margin:
+    4px
+    0
+    8px;
+
+  text-align:center;
+}
+
+.btcbrave-login-subtitle{
+  margin:
+    0
+    0
+    18px;
+
+  color:#6f665a;
+
+  text-align:center;
+}
+
+.btcbrave-login-card input{
+  width:100%;
+}
+
+.btcbrave-register-button{
+  width:100%;
+
+  margin-top:12px;
+
+  border:0;
+
+  border-radius:999px;
+
+  padding:12px 18px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #279b52,
+      #39c86a
+    );
+
+  color:#fff;
+
+  font-weight:900;
+
+  cursor:pointer;
+}
+
+.btcbrave-login-footnote{
+  margin-top:10px;
+
+  color:#6f665a;
+
+  text-align:center;
+
+  font-size:12px;
+}
+
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
 
 @media(max-width:700px){
 
@@ -211,7 +608,6 @@ body.start-open > main{
     font-size:17px;
   }
 
-
   #startCoverBtn{
     right:6%;
     top:25%;
@@ -219,6 +615,35 @@ body.start-open > main{
     padding:11px 20px;
 
     font-size:18px;
+  }
+
+
+  .header-left{
+    width:100%;
+
+    align-items:flex-start;
+  }
+
+
+  #backToStart{
+    padding:8px 10px;
+  }
+
+
+  .settings-top{
+    grid-template-columns:1fr;
+  }
+
+
+  .language-row{
+    flex-direction:column;
+
+    align-items:stretch;
+  }
+
+
+  #fontPreview{
+    min-height:90px;
   }
 
 }
@@ -232,7 +657,7 @@ body.start-open > main{
 
 
 <!-- ======================================================
-     PARTE 1 - TELA DE ABERTURA
+     TELA 1 - CAPA
      ====================================================== -->
 
 <section id="startScreen">
@@ -267,32 +692,165 @@ body.start-open > main{
 
 
 <!-- ======================================================
-     PROGRAMA ORIGINAL
+     CADASTRO BREVO
      ====================================================== -->
 
-<header>
+<iframe
+  name="hiddenBrevoFrame"
+  style="display:none"
+></iframe>
 
-  <div>
 
-    <h1>
-      English Practice
-    </h1>
+<div
+  id="btcbraveLoginOverlay"
+  class="btcbrave-login-overlay"
+>
 
-    <p>
-      Treino progressivo de palavras e frases
+  <div class="btcbrave-login-card">
+
+    <button
+      id="btcbraveLoginClose"
+      class="btcbrave-login-close"
+      type="button"
+    >
+      ×
+    </button>
+
+
+    <h2
+      class="btcbrave-login-title"
+      data-i18n="registerTitle"
+    >
+      Cadastre seu e-mail
+    </h2>
+
+
+    <p
+      class="btcbrave-login-subtitle"
+      data-i18n="registerSubtitle"
+    >
+      Registre-se para acompanhar o English Practice.
+    </p>
+
+
+    <form
+      id="btcbraveLoginForm"
+
+      action="https://2c3bfeb6.sibforms.com/serve/MUIFAKgSltnznFnj2zjaw4q0uanLuPr2YkDp8mCKOGx7h6wryGbcOg1E9mFahRvBm-kOBCKJOtMy9KAr8gMRb5wpQ6inGj09IQ58wRykX6PTnBjKQa7BQbWUIMTEIc54CEooAtFJHCiYZsoGRvag8I6YxWeVxSqiv_dCO4fEwcbslj8RbwoeIRN9V_5L3R8BiSU8D_unfJRG8BsjcA=="
+
+      method="POST"
+
+      target="hiddenBrevoFrame"
+    >
+
+
+      <input
+        type="email"
+
+        id="btcbraveLoginEmail"
+
+        name="EMAIL"
+
+        placeholder="Digite seu e-mail"
+
+        data-i18n-placeholder="emailPlaceholder"
+
+        autocomplete="email"
+
+        required
+      >
+
+
+      <button
+        type="submit"
+
+        class="btcbrave-register-button"
+
+        data-i18n="registerButton"
+      >
+        Cadastrar
+      </button>
+
+    </form>
+
+
+    <p
+      class="btcbrave-login-footnote"
+      data-i18n="registerFootnote"
+    >
+      Sem spam. Você pode cancelar quando quiser.
     </p>
 
   </div>
 
-  <span id="saved">
+</div>
+
+
+<button
+  id="floating-subscribe"
+  type="button"
+  aria-label="Cadastro por e-mail"
+>
+
+  🔔
+
+  <span id="subscribeCheck">
+    ✓
+  </span>
+
+</button>
+
+
+
+<!-- ======================================================
+     CABEÇALHO
+     ====================================================== -->
+
+<header>
+
+  <div class="header-left">
+
+
+    <button
+      id="backToStart"
+      type="button"
+    >
+      ← START
+    </button>
+
+
+    <div>
+
+      <h1>
+        English Practice
+      </h1>
+
+      <p data-i18n="subtitle">
+        Treino progressivo de palavras e frases
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <span
+    id="saved"
+    data-i18n="saved"
+  >
     ✓ Salvo automaticamente
   </span>
 
 </header>
 
 
+
 <main>
 
+
+<!-- ======================================================
+     TELA 2 - MEU MATERIAL
+     ====================================================== -->
 
 <section id="setup">
 
@@ -306,10 +864,14 @@ body.start-open > main{
       <div>
 
         <h2>
-          📚 Meu material
+          📚
+          <span data-i18n="myMaterial">
+            Meu material
+          </span>
         </h2>
 
-        <p>
+
+        <p data-i18n="savedBrowser">
           Tudo fica salvo neste navegador.
         </p>
 
@@ -318,11 +880,18 @@ body.start-open > main{
 
       <div>
 
-        <button id="newMat">
+        <button
+          id="newMat"
+          data-i18n="newMaterial"
+        >
           + Novo material
         </button>
 
-        <button id="delMat">
+
+        <button
+          id="delMat"
+          data-i18n="delete"
+        >
           Excluir
         </button>
 
@@ -332,12 +901,13 @@ body.start-open > main{
     </div>
 
 
+
     <div class="two">
 
 
       <div>
 
-        <label>
+        <label data-i18n="savedMaterial">
           Material salvo
         </label>
 
@@ -348,7 +918,7 @@ body.start-open > main{
 
       <div>
 
-        <label>
+        <label data-i18n="name">
           Nome
         </label>
 
@@ -360,24 +930,30 @@ body.start-open > main{
     </div>
 
 
-    <label>
+
+    <label data-i18n="wordsPhrases">
       Palavras e frases
     </label>
 
 
     <textarea
       id="raw"
+
       placeholder="go | cat | book | house | good morning | how are you?"
     ></textarea>
 
 
+
     <p class="tip">
 
-      Separe cada item com
+      <span data-i18n="separateItem">
+        Separe cada item com
+      </span>
 
       <b>|</b>
 
     </p>
+
 
 
     <div class="buttons">
@@ -385,15 +961,28 @@ body.start-open > main{
 
       <button
         id="organize"
+
         class="primary"
+
+        data-i18n="organizeMaterial"
       >
         Organizar material
       </button>
 
 
+      <!--
+        ESTE BOTÃO NÃO APARECE MAIS.
+        FICA SOMENTE PARA O APP.JS ATUAL CONTINUAR FUNCIONANDO.
+      -->
+
       <button
         id="start"
-        class="dark"
+
+        class="dark compat-hidden"
+
+        tabindex="-1"
+
+        aria-hidden="true"
       >
         ▶ Começar treino
       </button>
@@ -413,7 +1002,10 @@ body.start-open > main{
 
 
       <h2>
-        🧩 Material organizado
+        🧩
+        <span data-i18n="organizedMaterial">
+          Material organizado
+        </span>
       </h2>
 
 
@@ -435,6 +1027,10 @@ body.start-open > main{
 
 
 
+<!-- ======================================================
+     TELA 3 - TREINO
+     ====================================================== -->
+
 <section
   id="train"
   class="hidden"
@@ -444,9 +1040,14 @@ body.start-open > main{
   <div class="trainhead">
 
 
-    <button id="back">
+    <button
+      id="back"
+
+      data-i18n="material"
+    >
       ← Material
     </button>
+
 
 
     <div class="centerhead">
@@ -463,9 +1064,17 @@ body.start-open > main{
     </div>
 
 
+
+    <!--
+      NÃO APARECE.
+      EXISTE SÓ PARA NÃO QUEBRAR O APP.JS ATUAL.
+    -->
+
     <button
       id="menu"
-      class="hamb"
+      class="hamb compat-hidden"
+      tabindex="-1"
+      aria-hidden="true"
     >
       ☰
     </button>
@@ -475,9 +1084,13 @@ body.start-open > main{
 
 
 
+  <!-- ====================================================
+       TELA 4 - CONFIGURAÇÕES
+       ==================================================== -->
+
   <div
     id="settings"
-    class="card hidden"
+    class="card"
   >
 
 
@@ -485,11 +1098,21 @@ body.start-open > main{
 
 
       <h3>
-        ⚙️ Configurações
+        ⚙️
+        <span data-i18n="settings">
+          Configurações
+        </span>
       </h3>
 
 
-      <button id="closeMenu">
+      <!-- compatibilidade com app.js -->
+
+      <button
+        id="closeMenu"
+        class="compat-hidden"
+        tabindex="-1"
+        aria-hidden="true"
+      >
         ×
       </button>
 
@@ -498,13 +1121,107 @@ body.start-open > main{
 
 
 
-    <div class="three">
+    <!-- IDIOMA DO SITE -->
+
+    <div class="language-settings">
+
+
+      <label
+        for="siteLanguage"
+        data-i18n="language"
+      >
+        Idioma do site
+      </label>
+
+
+      <div class="language-row">
+
+
+        <select id="siteLanguage">
+
+
+          <option value="en">
+            English
+          </option>
+
+
+          <option value="pt">
+            Português
+          </option>
+
+
+          <option value="it">
+            Italiano
+          </option>
+
+
+          <option value="ro">
+            Română
+          </option>
+
+
+          <option value="es">
+            Español
+          </option>
+
+
+          <option value="fr">
+            Français
+          </option>
+
+
+          <option value="de">
+            Deutsch
+          </option>
+
+
+          <option value="ar">
+            العربية
+          </option>
+
+
+          <option value="hi">
+            हिन्दी
+          </option>
+
+
+          <option value="ja">
+            日本語
+          </option>
+
+
+        </select>
+
+
+
+        <button
+          id="saveLanguage"
+          type="button"
+          data-i18n="saveLanguage"
+        >
+          Salvar idioma
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+
+
+    <!-- NÍVEL + TEMPO -->
+
+    <div class="settings-top">
 
 
       <div>
 
 
-        <label>
+        <label
+          for="level"
+          data-i18n="level"
+        >
           Nível
         </label>
 
@@ -519,7 +1236,10 @@ body.start-open > main{
       <div>
 
 
-        <label>
+        <label
+          for="secs"
+          data-i18n="time"
+        >
           Tempo
         </label>
 
@@ -529,48 +1249,17 @@ body.start-open > main{
 
           <input
             id="secs"
+
             type="number"
+
             min="1"
             max="300"
           >
 
 
-          <span>
+          <span data-i18n="seconds">
             segundos
           </span>
-
-
-        </div>
-
-
-      </div>
-
-
-
-      <div>
-
-
-        <label>
-          Tamanho
-        </label>
-
-
-        <div class="buttons">
-
-
-          <button id="smaller">
-            A−
-          </button>
-
-
-          <button id="autoFont">
-            Auto
-          </button>
-
-
-          <button id="bigger">
-            A+
-          </button>
 
 
         </div>
@@ -583,14 +1272,20 @@ body.start-open > main{
 
 
 
+    <!-- BARRA DE TEMPO -->
+
     <input
       id="range"
+
       type="range"
+
       min="1"
       max="300"
     >
 
 
+
+    <!-- TEMPOS RÁPIDOS -->
 
     <div class="quick">
 
@@ -643,9 +1338,56 @@ body.start-open > main{
     </div>
 
 
+
+    <!-- TAMANHO DA LETRA MOVIDO PARA BAIXO -->
+
+    <div class="font-preview-card">
+
+
+      <div
+        class="font-preview-title"
+        data-i18n="fontSize"
+      >
+        Tamanho da letra
+      </div>
+
+
+      <div id="fontPreview">
+        BTCBRAVE
+      </div>
+
+
+      <div class="buttons font-size-buttons">
+
+
+        <button id="smaller">
+          A−
+        </button>
+
+
+        <button id="autoFont">
+          Auto
+        </button>
+
+
+        <button id="bigger">
+          A+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+
   </div>
 
 
+
+  <!-- ====================================================
+       ÁREA DO EXERCÍCIO
+       ==================================================== -->
 
   <div class="card">
 
@@ -678,17 +1420,21 @@ body.start-open > main{
       >
 
 
-        <div class="answerlabel">
-
+        <div
+          class="answerlabel"
+          data-i18n="writeSeen"
+        >
           Escreva o que você viu
-
         </div>
 
 
         <input
           id="answer"
+
           autocomplete="off"
+
           autocapitalize="off"
+
           spellcheck="false"
         >
 
@@ -703,10 +1449,15 @@ body.start-open > main{
 
 
 
+    <!-- CONTROLES PRINCIPAIS CONTINUAM -->
+
     <div class="controls">
 
 
-      <button id="prev">
+      <button
+        id="prev"
+        data-i18n="previous"
+      >
         ← Anterior
       </button>
 
@@ -714,6 +1465,7 @@ body.start-open > main{
       <button
         id="replay"
         class="primary"
+        data-i18n="showAgain"
       >
         ↻ Mostrar de novo
       </button>
@@ -722,6 +1474,7 @@ body.start-open > main{
       <button
         id="next"
         class="dark"
+        data-i18n="next"
       >
         Próximo →
       </button>
@@ -730,6 +1483,11 @@ body.start-open > main{
     </div>
 
 
+
+    <!--
+      ESTES 3 NÃO APARECEM MAIS.
+      AINDA EXISTEM PARA NÃO QUEBRAR O APP.JS.
+    -->
 
     <div class="controls smallcontrols">
 
@@ -762,13 +1520,18 @@ body.start-open > main{
 
 
 
-<script src="app.js?v=3"></script>
+<!-- ======================================================
+     APP ORIGINAL
+     ====================================================== -->
+
+<script src="app.js?v=4"></script>
+
 
 
 <script>
 
 /* =========================================================
-   PARTE 1 - IDIOMAS DA CAPA
+   CAPA - IDIOMAS MUDANDO
    ========================================================= */
 
 const coverLanguages = [
@@ -785,7 +1548,13 @@ const coverLanguages = [
 
   "Français 🇫🇷",
 
-  "Deutsch 🇩🇪"
+  "Deutsch 🇩🇪",
+
+  "العربية 🇸🇦",
+
+  "हिन्दी 🇮🇳",
+
+  "日本語 🇯🇵"
 
 ];
 
@@ -794,7 +1563,9 @@ let coverLanguageIndex = 0;
 
 
 const startLanguage =
-  document.getElementById("startLanguage");
+  document.getElementById(
+    "startLanguage"
+  );
 
 
 function changeCoverLanguage(){
@@ -804,28 +1575,38 @@ function changeCoverLanguage(){
   }
 
 
-  startLanguage.classList.add("hide");
+  startLanguage.classList.add(
+    "hide"
+  );
 
 
-  setTimeout(() => {
+  setTimeout(
+    ()=>{
 
-    coverLanguageIndex++;
-
-    if(
-      coverLanguageIndex >=
-      coverLanguages.length
-    ){
-      coverLanguageIndex = 0;
-    }
+      coverLanguageIndex++;
 
 
-    startLanguage.textContent =
-      coverLanguages[coverLanguageIndex];
+      if(
+        coverLanguageIndex >=
+        coverLanguages.length
+      ){
+        coverLanguageIndex=0;
+      }
 
 
-    startLanguage.classList.remove("hide");
+      startLanguage.textContent=
+        coverLanguages[
+          coverLanguageIndex
+        ];
 
-  },350);
+
+      startLanguage.classList.remove(
+        "hide"
+      );
+
+    },
+    350
+  );
 
 }
 
@@ -838,36 +1619,1527 @@ setInterval(
 
 
 /* =========================================================
-   BOTÃO START
+   START
    ========================================================= */
 
-const startCoverBtn =
-  document.getElementById("startCoverBtn");
-
-
 const startScreen =
-  document.getElementById("startScreen");
+  document.getElementById(
+    "startScreen"
+  );
 
 
-if(startCoverBtn){
+const startCoverBtn =
+  document.getElementById(
+    "startCoverBtn"
+  );
 
-  startCoverBtn.addEventListener(
+
+function hideStartScreen(){
+
+  if(startScreen){
+
+    startScreen.style.display=
+      "none";
+
+  }
+
+
+  document.body.classList.remove(
+    "start-open"
+  );
+
+}
+
+
+function showStartScreen(){
+
+  if(startScreen){
+
+    startScreen.style.display=
+      "flex";
+
+  }
+
+
+  document.body.classList.add(
+    "start-open"
+  );
+
+}
+
+
+startCoverBtn?.addEventListener(
+  "click",
+  ()=>{
+
+    hideStartScreen();
+
+
+    /*
+      TENTA ENTRAR DIRETO NO TREINO.
+
+      SE EXISTIR MATERIAL SALVO,
+      O APP.JS ABRE O TREINO.
+
+      SE A PESSOA AINDA NÃO TIVER
+      MATERIAL, A TELA DE MATERIAL
+      CONTINUA DISPONÍVEL.
+    */
+
+    setTimeout(
+      ()=>{
+
+        const hiddenStart=
+          document.getElementById(
+            "start"
+          );
+
+
+        hiddenStart?.click();
+
+      },
+      60
+    );
+
+  }
+);
+
+
+
+document
+  .getElementById(
+    "backToStart"
+  )
+  ?.addEventListener(
     "click",
-    () => {
-
-      if(startScreen){
-        startScreen.style.display = "none";
-      }
+    showStartScreen
+  );
 
 
-      document.body.classList.remove(
-        "start-open"
-      );
+
+/* =========================================================
+   PRÉVIA TAMANHO DA LETRA
+   ========================================================= */
+
+const FONT_PREVIEW_KEY=
+  "englishPractice.previewFontSize";
+
+
+let previewFontSize=
+  parseInt(
+    localStorage.getItem(
+      FONT_PREVIEW_KEY
+    ) || "54",
+    10
+  );
+
+
+const fontPreview=
+  document.getElementById(
+    "fontPreview"
+  );
+
+
+function drawFontPreview(){
+
+  if(!fontPreview){
+    return;
+  }
+
+
+  previewFontSize=
+    Math.max(
+      20,
+      Math.min(
+        110,
+        previewFontSize
+      )
+    );
+
+
+  fontPreview.style.fontSize=
+    previewFontSize+"px";
+
+
+  localStorage.setItem(
+    FONT_PREVIEW_KEY,
+    previewFontSize
+  );
+
+}
+
+
+drawFontPreview();
+
+
+
+document
+  .getElementById(
+    "smaller"
+  )
+  ?.addEventListener(
+    "click",
+    ()=>{
+
+      previewFontSize-=4;
+
+      drawFontPreview();
 
     }
   );
 
+
+
+document
+  .getElementById(
+    "bigger"
+  )
+  ?.addEventListener(
+    "click",
+    ()=>{
+
+      previewFontSize+=4;
+
+      drawFontPreview();
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "autoFont"
+  )
+  ?.addEventListener(
+    "click",
+    ()=>{
+
+      previewFontSize=54;
+
+      drawFontPreview();
+
+    }
+  );
+
+
+
+/* =========================================================
+   TRADUÇÃO DA INTERFACE
+   ========================================================= */
+
+const LANGUAGE_KEY=
+  "englishPractice.uiLanguage";
+
+
+const translations={
+
+
+pt:{
+
+  subtitle:
+    "Treino progressivo de palavras e frases",
+
+  saved:
+    "✓ Salvo automaticamente",
+
+  myMaterial:
+    "Meu material",
+
+  savedBrowser:
+    "Tudo fica salvo neste navegador.",
+
+  newMaterial:
+    "+ Novo material",
+
+  delete:
+    "Excluir",
+
+  savedMaterial:
+    "Material salvo",
+
+  name:
+    "Nome",
+
+  wordsPhrases:
+    "Palavras e frases",
+
+  separateItem:
+    "Separe cada item com",
+
+  organizeMaterial:
+    "Organizar material",
+
+  organizedMaterial:
+    "Material organizado",
+
+  material:
+    "← Material",
+
+  settings:
+    "Configurações",
+
+  language:
+    "Idioma do site",
+
+  saveLanguage:
+    "Salvar idioma",
+
+  level:
+    "Nível",
+
+  time:
+    "Tempo",
+
+  seconds:
+    "segundos",
+
+  fontSize:
+    "Tamanho da letra",
+
+  writeSeen:
+    "Escreva o que você viu",
+
+  previous:
+    "← Anterior",
+
+  showAgain:
+    "↻ Mostrar de novo",
+
+  next:
+    "Próximo →",
+
+  registerTitle:
+    "Cadastre seu e-mail",
+
+  registerSubtitle:
+    "Registre-se para acompanhar o English Practice.",
+
+  emailPlaceholder:
+    "Digite seu e-mail",
+
+  registerButton:
+    "Cadastrar",
+
+  registerFootnote:
+    "Sem spam. Você pode cancelar quando quiser."
+
+},
+
+
+
+en:{
+
+  subtitle:
+    "Progressive word and phrase training",
+
+  saved:
+    "✓ Saved automatically",
+
+  myMaterial:
+    "My material",
+
+  savedBrowser:
+    "Everything is saved in this browser.",
+
+  newMaterial:
+    "+ New material",
+
+  delete:
+    "Delete",
+
+  savedMaterial:
+    "Saved material",
+
+  name:
+    "Name",
+
+  wordsPhrases:
+    "Words and phrases",
+
+  separateItem:
+    "Separate each item with",
+
+  organizeMaterial:
+    "Organize material",
+
+  organizedMaterial:
+    "Organized material",
+
+  material:
+    "← Material",
+
+  settings:
+    "Settings",
+
+  language:
+    "Site language",
+
+  saveLanguage:
+    "Save language",
+
+  level:
+    "Level",
+
+  time:
+    "Time",
+
+  seconds:
+    "seconds",
+
+  fontSize:
+    "Font size",
+
+  writeSeen:
+    "Write what you saw",
+
+  previous:
+    "← Previous",
+
+  showAgain:
+    "↻ Show again",
+
+  next:
+    "Next →",
+
+  registerTitle:
+    "Register your email",
+
+  registerSubtitle:
+    "Sign up to use English Practice.",
+
+  emailPlaceholder:
+    "Enter your email",
+
+  registerButton:
+    "Sign up",
+
+  registerFootnote:
+    "No spam. You can unsubscribe anytime."
+
+},
+
+
+
+it:{
+
+  subtitle:
+    "Allenamento progressivo di parole e frasi",
+
+  saved:
+    "✓ Salvato automaticamente",
+
+  myMaterial:
+    "Il mio materiale",
+
+  savedBrowser:
+    "Tutto viene salvato in questo browser.",
+
+  newMaterial:
+    "+ Nuovo materiale",
+
+  delete:
+    "Elimina",
+
+  savedMaterial:
+    "Materiale salvato",
+
+  name:
+    "Nome",
+
+  wordsPhrases:
+    "Parole e frasi",
+
+  separateItem:
+    "Separa ogni elemento con",
+
+  organizeMaterial:
+    "Organizza materiale",
+
+  organizedMaterial:
+    "Materiale organizzato",
+
+  material:
+    "← Materiale",
+
+  settings:
+    "Impostazioni",
+
+  language:
+    "Lingua del sito",
+
+  saveLanguage:
+    "Salva lingua",
+
+  level:
+    "Livello",
+
+  time:
+    "Tempo",
+
+  seconds:
+    "secondi",
+
+  fontSize:
+    "Dimensione carattere",
+
+  writeSeen:
+    "Scrivi ciò che hai visto",
+
+  previous:
+    "← Precedente",
+
+  showAgain:
+    "↻ Mostra di nuovo",
+
+  next:
+    "Avanti →",
+
+  registerTitle:
+    "Registra la tua e-mail",
+
+  registerSubtitle:
+    "Registrati per usare English Practice.",
+
+  emailPlaceholder:
+    "Inserisci la tua e-mail",
+
+  registerButton:
+    "Registrati",
+
+  registerFootnote:
+    "Niente spam. Puoi annullare l'iscrizione quando vuoi."
+
+},
+
+
+
+ro:{
+
+  subtitle:
+    "Antrenament progresiv de cuvinte și fraze",
+
+  saved:
+    "✓ Salvat automat",
+
+  myMaterial:
+    "Materialul meu",
+
+  savedBrowser:
+    "Totul este salvat în acest browser.",
+
+  newMaterial:
+    "+ Material nou",
+
+  delete:
+    "Șterge",
+
+  savedMaterial:
+    "Material salvat",
+
+  name:
+    "Nume",
+
+  wordsPhrases:
+    "Cuvinte și fraze",
+
+  separateItem:
+    "Separă fiecare element cu",
+
+  organizeMaterial:
+    "Organizează materialul",
+
+  organizedMaterial:
+    "Material organizat",
+
+  material:
+    "← Material",
+
+  settings:
+    "Setări",
+
+  language:
+    "Limba site-ului",
+
+  saveLanguage:
+    "Salvează limba",
+
+  level:
+    "Nivel",
+
+  time:
+    "Timp",
+
+  seconds:
+    "secunde",
+
+  fontSize:
+    "Dimensiunea textului",
+
+  writeSeen:
+    "Scrie ce ai văzut",
+
+  previous:
+    "← Anterior",
+
+  showAgain:
+    "↻ Arată din nou",
+
+  next:
+    "Următor →",
+
+  registerTitle:
+    "Înregistrează e-mailul",
+
+  registerSubtitle:
+    "Înregistrează-te pentru English Practice.",
+
+  emailPlaceholder:
+    "Introdu adresa de e-mail",
+
+  registerButton:
+    "Înregistrează-te",
+
+  registerFootnote:
+    "Fără spam. Te poți dezabona oricând."
+
+},
+
+
+
+es:{
+
+  subtitle:
+    "Entrenamiento progresivo de palabras y frases",
+
+  saved:
+    "✓ Guardado automáticamente",
+
+  myMaterial:
+    "Mi material",
+
+  savedBrowser:
+    "Todo queda guardado en este navegador.",
+
+  newMaterial:
+    "+ Nuevo material",
+
+  delete:
+    "Eliminar",
+
+  savedMaterial:
+    "Material guardado",
+
+  name:
+    "Nombre",
+
+  wordsPhrases:
+    "Palabras y frases",
+
+  separateItem:
+    "Separa cada elemento con",
+
+  organizeMaterial:
+    "Organizar material",
+
+  organizedMaterial:
+    "Material organizado",
+
+  material:
+    "← Material",
+
+  settings:
+    "Configuración",
+
+  language:
+    "Idioma del sitio",
+
+  saveLanguage:
+    "Guardar idioma",
+
+  level:
+    "Nivel",
+
+  time:
+    "Tiempo",
+
+  seconds:
+    "segundos",
+
+  fontSize:
+    "Tamaño de letra",
+
+  writeSeen:
+    "Escribe lo que viste",
+
+  previous:
+    "← Anterior",
+
+  showAgain:
+    "↻ Mostrar de nuevo",
+
+  next:
+    "Siguiente →",
+
+  registerTitle:
+    "Registra tu correo",
+
+  registerSubtitle:
+    "Regístrate para usar English Practice.",
+
+  emailPlaceholder:
+    "Introduce tu correo",
+
+  registerButton:
+    "Registrarse",
+
+  registerFootnote:
+    "Sin spam. Puedes darte de baja cuando quieras."
+
+},
+
+
+
+fr:{
+
+  subtitle:
+    "Entraînement progressif de mots et de phrases",
+
+  saved:
+    "✓ Enregistré automatiquement",
+
+  myMaterial:
+    "Mon matériel",
+
+  savedBrowser:
+    "Tout est enregistré dans ce navigateur.",
+
+  newMaterial:
+    "+ Nouveau matériel",
+
+  delete:
+    "Supprimer",
+
+  savedMaterial:
+    "Matériel enregistré",
+
+  name:
+    "Nom",
+
+  wordsPhrases:
+    "Mots et phrases",
+
+  separateItem:
+    "Séparez chaque élément avec",
+
+  organizeMaterial:
+    "Organiser le matériel",
+
+  organizedMaterial:
+    "Matériel organisé",
+
+  material:
+    "← Matériel",
+
+  settings:
+    "Paramètres",
+
+  language:
+    "Langue du site",
+
+  saveLanguage:
+    "Enregistrer la langue",
+
+  level:
+    "Niveau",
+
+  time:
+    "Temps",
+
+  seconds:
+    "secondes",
+
+  fontSize:
+    "Taille du texte",
+
+  writeSeen:
+    "Écrivez ce que vous avez vu",
+
+  previous:
+    "← Précédent",
+
+  showAgain:
+    "↻ Afficher à nouveau",
+
+  next:
+    "Suivant →",
+
+  registerTitle:
+    "Enregistrez votre e-mail",
+
+  registerSubtitle:
+    "Inscrivez-vous à English Practice.",
+
+  emailPlaceholder:
+    "Entrez votre e-mail",
+
+  registerButton:
+    "S'inscrire",
+
+  registerFootnote:
+    "Pas de spam. Désabonnement possible à tout moment."
+
+},
+
+
+
+de:{
+
+  subtitle:
+    "Progressives Wort- und Satztraining",
+
+  saved:
+    "✓ Automatisch gespeichert",
+
+  myMaterial:
+    "Mein Material",
+
+  savedBrowser:
+    "Alles wird in diesem Browser gespeichert.",
+
+  newMaterial:
+    "+ Neues Material",
+
+  delete:
+    "Löschen",
+
+  savedMaterial:
+    "Gespeichertes Material",
+
+  name:
+    "Name",
+
+  wordsPhrases:
+    "Wörter und Sätze",
+
+  separateItem:
+    "Trenne jedes Element mit",
+
+  organizeMaterial:
+    "Material organisieren",
+
+  organizedMaterial:
+    "Organisiertes Material",
+
+  material:
+    "← Material",
+
+  settings:
+    "Einstellungen",
+
+  language:
+    "Website-Sprache",
+
+  saveLanguage:
+    "Sprache speichern",
+
+  level:
+    "Stufe",
+
+  time:
+    "Zeit",
+
+  seconds:
+    "Sekunden",
+
+  fontSize:
+    "Schriftgröße",
+
+  writeSeen:
+    "Schreibe, was du gesehen hast",
+
+  previous:
+    "← Zurück",
+
+  showAgain:
+    "↻ Erneut anzeigen",
+
+  next:
+    "Weiter →",
+
+  registerTitle:
+    "E-Mail registrieren",
+
+  registerSubtitle:
+    "Registriere dich für English Practice.",
+
+  emailPlaceholder:
+    "E-Mail eingeben",
+
+  registerButton:
+    "Registrieren",
+
+  registerFootnote:
+    "Kein Spam. Abmeldung jederzeit möglich."
+
+},
+
+
+
+ar:{
+
+  subtitle:
+    "تدريب تدريجي على الكلمات والعبارات",
+
+  saved:
+    "✓ تم الحفظ تلقائيًا",
+
+  myMaterial:
+    "موادي",
+
+  savedBrowser:
+    "يتم حفظ كل شيء في هذا المتصفح.",
+
+  newMaterial:
+    "+ مادة جديدة",
+
+  delete:
+    "حذف",
+
+  savedMaterial:
+    "المواد المحفوظة",
+
+  name:
+    "الاسم",
+
+  wordsPhrases:
+    "الكلمات والعبارات",
+
+  separateItem:
+    "افصل كل عنصر باستخدام",
+
+  organizeMaterial:
+    "تنظيم المواد",
+
+  organizedMaterial:
+    "المواد المنظمة",
+
+  material:
+    "← المواد",
+
+  settings:
+    "الإعدادات",
+
+  language:
+    "لغة الموقع",
+
+  saveLanguage:
+    "حفظ اللغة",
+
+  level:
+    "المستوى",
+
+  time:
+    "الوقت",
+
+  seconds:
+    "ثوانٍ",
+
+  fontSize:
+    "حجم الخط",
+
+  writeSeen:
+    "اكتب ما رأيته",
+
+  previous:
+    "← السابق",
+
+  showAgain:
+    "↻ عرض مرة أخرى",
+
+  next:
+    "التالي →",
+
+  registerTitle:
+    "سجل بريدك الإلكتروني",
+
+  registerSubtitle:
+    "سجل لاستخدام English Practice.",
+
+  emailPlaceholder:
+    "أدخل بريدك الإلكتروني",
+
+  registerButton:
+    "تسجيل",
+
+  registerFootnote:
+    "لا رسائل مزعجة. يمكنك إلغاء الاشتراك في أي وقت."
+
+},
+
+
+
+hi:{
+
+  subtitle:
+    "शब्दों और वाक्यांशों का प्रगतिशील अभ्यास",
+
+  saved:
+    "✓ अपने आप सहेजा गया",
+
+  myMaterial:
+    "मेरी सामग्री",
+
+  savedBrowser:
+    "सब कुछ इस ब्राउज़र में सहेजा जाता है।",
+
+  newMaterial:
+    "+ नई सामग्री",
+
+  delete:
+    "हटाएँ",
+
+  savedMaterial:
+    "सहेजी गई सामग्री",
+
+  name:
+    "नाम",
+
+  wordsPhrases:
+    "शब्द और वाक्यांश",
+
+  separateItem:
+    "हर आइटम को इससे अलग करें",
+
+  organizeMaterial:
+    "सामग्री व्यवस्थित करें",
+
+  organizedMaterial:
+    "व्यवस्थित सामग्री",
+
+  material:
+    "← सामग्री",
+
+  settings:
+    "सेटिंग्स",
+
+  language:
+    "साइट की भाषा",
+
+  saveLanguage:
+    "भाषा सहेजें",
+
+  level:
+    "स्तर",
+
+  time:
+    "समय",
+
+  seconds:
+    "सेकंड",
+
+  fontSize:
+    "अक्षर का आकार",
+
+  writeSeen:
+    "जो आपने देखा वह लिखें",
+
+  previous:
+    "← पिछला",
+
+  showAgain:
+    "↻ फिर दिखाएँ",
+
+  next:
+    "अगला →",
+
+  registerTitle:
+    "अपना ईमेल दर्ज करें",
+
+  registerSubtitle:
+    "English Practice के लिए साइन अप करें।",
+
+  emailPlaceholder:
+    "अपना ईमेल दर्ज करें",
+
+  registerButton:
+    "साइन अप",
+
+  registerFootnote:
+    "कोई स्पैम नहीं। आप कभी भी सदस्यता रद्द कर सकते हैं।"
+
+},
+
+
+
+ja:{
+
+  subtitle:
+    "単語とフレーズの段階的な練習",
+
+  saved:
+    "✓ 自動保存",
+
+  myMaterial:
+    "マイ教材",
+
+  savedBrowser:
+    "すべてこのブラウザに保存されます。",
+
+  newMaterial:
+    "+ 新しい教材",
+
+  delete:
+    "削除",
+
+  savedMaterial:
+    "保存した教材",
+
+  name:
+    "名前",
+
+  wordsPhrases:
+    "単語とフレーズ",
+
+  separateItem:
+    "各項目を次の記号で区切る",
+
+  organizeMaterial:
+    "教材を整理",
+
+  organizedMaterial:
+    "整理された教材",
+
+  material:
+    "← 教材",
+
+  settings:
+    "設定",
+
+  language:
+    "サイトの言語",
+
+  saveLanguage:
+    "言語を保存",
+
+  level:
+    "レベル",
+
+  time:
+    "時間",
+
+  seconds:
+    "秒",
+
+  fontSize:
+    "文字サイズ",
+
+  writeSeen:
+    "見たものを書いてください",
+
+  previous:
+    "← 前へ",
+
+  showAgain:
+    "↻ もう一度",
+
+  next:
+    "次へ →",
+
+  registerTitle:
+    "メールを登録",
+
+  registerSubtitle:
+    "English Practice に登録してください。",
+
+  emailPlaceholder:
+    "メールアドレスを入力",
+
+  registerButton:
+    "登録",
+
+  registerFootnote:
+    "迷惑メールは送りません。いつでも解除できます。"
+
 }
+
+};
+
+
+
+const siteLanguage=
+  document.getElementById(
+    "siteLanguage"
+  );
+
+
+const saveLanguage=
+  document.getElementById(
+    "saveLanguage"
+  );
+
+
+function applyLanguage(code){
+
+  const dict=
+    translations[code] ||
+    translations.pt;
+
+
+  document
+    .querySelectorAll(
+      "[data-i18n]"
+    )
+    .forEach(el=>{
+
+      const key=
+        el.dataset.i18n;
+
+
+      if(dict[key]!==undefined){
+
+        el.textContent=
+          dict[key];
+
+      }
+
+    });
+
+
+
+  document
+    .querySelectorAll(
+      "[data-i18n-placeholder]"
+    )
+    .forEach(el=>{
+
+      const key=
+        el.dataset.i18nPlaceholder;
+
+
+      if(dict[key]!==undefined){
+
+        el.placeholder=
+          dict[key];
+
+      }
+
+    });
+
+
+  if(siteLanguage){
+
+    siteLanguage.value=code;
+
+  }
+
+
+  document.documentElement.lang=
+    code==="pt"
+      ?"pt-BR"
+      :code;
+
+}
+
+
+
+const savedLanguage=
+  localStorage.getItem(
+    LANGUAGE_KEY
+  ) || "pt";
+
+
+applyLanguage(
+  savedLanguage
+);
+
+
+
+saveLanguage?.addEventListener(
+  "click",
+  ()=>{
+
+    const code=
+      siteLanguage.value;
+
+
+    localStorage.setItem(
+      LANGUAGE_KEY,
+      code
+    );
+
+
+    applyLanguage(
+      code
+    );
+
+
+    const normal=
+      saveLanguage.textContent;
+
+
+    saveLanguage.textContent=
+      "✓";
+
+
+    setTimeout(
+      ()=>{
+
+        applyLanguage(
+          code
+        );
+
+      },
+      900
+    );
+
+  }
+);
+
+
+
+/* =========================================================
+   CADASTRO BREVO + SININHO
+   ========================================================= */
+
+const subscribeOverlay=
+  document.getElementById(
+    "btcbraveLoginOverlay"
+  );
+
+
+const subscribeBell=
+  document.getElementById(
+    "floating-subscribe"
+  );
+
+
+const subscribeCheck=
+  document.getElementById(
+    "subscribeCheck"
+  );
+
+
+const subscribeClose=
+  document.getElementById(
+    "btcbraveLoginClose"
+  );
+
+
+const subscribeForm=
+  document.getElementById(
+    "btcbraveLoginForm"
+  );
+
+
+function subscribed(){
+
+  return(
+    localStorage.getItem(
+      "englishSubscribed"
+    )==="true"
+  );
+
+}
+
+
+function updateSubscribeBell(){
+
+  if(subscribed()){
+
+    subscribeCheck.style.display=
+      "flex";
+
+
+    subscribeBell.style.background=
+      "#edfff2";
+
+
+    subscribeBell.style.borderColor=
+      "#18a84b";
+
+  }
+  else{
+
+    subscribeCheck.style.display=
+      "none";
+
+
+    subscribeBell.style.background=
+      "#fffaf0";
+
+
+    subscribeBell.style.borderColor=
+      "#cdbda6";
+
+  }
+
+}
+
+
+function openSubscribe(){
+
+  subscribeOverlay.style.display=
+    "flex";
+
+
+  setTimeout(
+    ()=>{
+
+      document
+        .getElementById(
+          "btcbraveLoginEmail"
+        )
+        ?.focus();
+
+    },
+    100
+  );
+
+}
+
+
+function closeSubscribe(){
+
+  subscribeOverlay.style.display=
+    "none";
+
+}
+
+
+subscribeBell?.addEventListener(
+  "click",
+  ()=>{
+
+    if(subscribed()){
+
+      alert(
+        "Thanks for signing up!"
+      );
+
+      return;
+
+    }
+
+
+    openSubscribe();
+
+  }
+);
+
+
+
+subscribeClose?.addEventListener(
+  "click",
+  closeSubscribe
+);
+
+
+
+subscribeOverlay?.addEventListener(
+  "click",
+  e=>{
+
+    if(
+      e.target===
+      subscribeOverlay
+    ){
+
+      closeSubscribe();
+
+    }
+
+  }
+);
+
+
+
+subscribeForm?.addEventListener(
+  "submit",
+  ()=>{
+
+    localStorage.setItem(
+      "englishSubscribed",
+      "true"
+    );
+
+
+    setTimeout(
+      ()=>{
+
+        updateSubscribeBell();
+
+        closeSubscribe();
+
+
+        alert(
+          "Thanks for signing up!"
+        );
+
+      },
+      700
+    );
+
+  }
+);
+
+
+
+updateSubscribeBell();
+
+
+
+/* SININHO VIBRA DE VEZ EM QUANDO */
+
+function shakeBell(){
+
+  if(
+    subscribed() ||
+    document.body.classList.contains(
+      "start-open"
+    )
+  ){
+    return;
+  }
+
+
+  subscribeBell.classList.remove(
+    "bell-shake"
+  );
+
+
+  void subscribeBell.offsetWidth;
+
+
+  subscribeBell.classList.add(
+    "bell-shake"
+  );
+
+
+  setTimeout(
+    ()=>{
+
+      subscribeBell.classList.remove(
+        "bell-shake"
+      );
+
+    },
+    900
+  );
+
+}
+
+
+setTimeout(
+  shakeBell,
+  1800
+);
+
+
+setInterval(
+  shakeBell,
+  5500
+);
 
 
 
@@ -875,18 +3147,24 @@ if(startCoverBtn){
    SERVICE WORKER
    ========================================================= */
 
-if ("serviceWorker" in navigator) {
+if(
+  "serviceWorker"
+  in navigator
+){
 
   window.addEventListener(
     "load",
-    () => {
+    ()=>{
 
-      navigator.serviceWorker.register(
-        "./sw.js?v=3",
-        {
-          updateViaCache: "none"
-        }
-      );
+      navigator
+        .serviceWorker
+        .register(
+          "./sw.js?v=4",
+          {
+            updateViaCache:
+              "none"
+          }
+        );
 
     }
   );
