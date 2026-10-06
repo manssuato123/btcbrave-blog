@@ -14,7 +14,7 @@
 
 <link
   rel="stylesheet"
-  href="styles.css?v=4"
+  href="styles.css?v=5"
 >
 
 <link
@@ -207,6 +207,7 @@ body.start-open #floating-subscribe{
 }
 
 #backToStart{
+  display:none !important;
   border-radius:999px;
 
   background:#fffaf0;
@@ -648,6 +649,84 @@ body.start-open #floating-subscribe{
 
 }
 
+
+/* =========================================================
+   LAYOUT V5 - TELAS SEPARADAS
+   ========================================================= */
+
+.page-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:14px;
+  margin-bottom:14px;
+}
+
+.page-topbar button{
+  background:#fffaf2;
+  border:1px solid var(--border,#cdbda6);
+  border-radius:12px;
+}
+
+.train-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.settings-button{
+  background:#f06a16;
+  color:#fff;
+  border-color:#d95609;
+}
+
+.practice-start{
+  grid-area:1 / 1;
+  min-width:220px;
+  padding:18px 34px;
+  border-radius:999px;
+  border:2px solid #279b52;
+  background:#39ff14;
+  color:#0b4d00;
+  font-size:clamp(22px,4vw,34px);
+  font-weight:900;
+  box-shadow:0 0 0 6px rgba(57,255,20,.15),0 10px 28px rgba(0,0,0,.16);
+  z-index:5;
+}
+
+#settingsPage > #settings{
+  display:block !important;
+}
+
+#floating-subscribe{
+  top:12px !important;
+  right:12px !important;
+  bottom:auto !important;
+}
+
+header{
+  padding-right:88px !important;
+}
+
+#train .trainhead{
+  padding-right:70px;
+}
+
+@media(max-width:700px){
+  #train .trainhead{
+    align-items:flex-start;
+    flex-wrap:wrap;
+    padding-right:62px;
+  }
+  .settings-button{
+    padding:8px 10px;
+  }
+  .practice-start{
+    min-width:170px;
+    padding:15px 24px;
+  }
+}
+
 </style>
 
 </head>
@@ -854,6 +933,10 @@ body.start-open #floating-subscribe{
 
 <section id="setup">
 
+  <div class="page-topbar">
+    <button id="materialBackToTrain" type="button">← Voltar</button>
+    <strong data-i18n="myMaterial">Meu material</strong>
+  </div>
 
   <div class="card">
 
@@ -1065,19 +1148,19 @@ body.start-open #floating-subscribe{
 
 
 
-    <!--
-      NÃO APARECE.
-      EXISTE SÓ PARA NÃO QUEBRAR O APP.JS ATUAL.
-    -->
+    <div class="train-actions">
+      <button id="openSettings" type="button" class="settings-button">
+        ⚙ <span data-i18n="settings">Configurações</span>
+      </button>
 
-    <button
-      id="menu"
-      class="hamb compat-hidden"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      ☰
-    </button>
+      <!-- Mantido escondido somente para compatibilidade com o app.js atual -->
+      <button
+        id="menu"
+        class="hamb compat-hidden"
+        tabindex="-1"
+        aria-hidden="true"
+      >☰</button>
+    </div>
 
 
   </div>
@@ -1085,8 +1168,148 @@ body.start-open #floating-subscribe{
 
 
   <!-- ====================================================
-       TELA 4 - CONFIGURAÇÕES
+       ÁREA DO EXERCÍCIO
        ==================================================== -->
+
+  <div class="card">
+
+
+    <div class="meta">
+
+
+      <span id="badge"></span>
+
+
+      <span id="clock"></span>
+
+
+    </div>
+
+
+
+    <div id="stage">
+
+      <button id="practiceStartBtn" type="button" class="practice-start">
+        ▶ COMEÇAR
+      </button>
+
+      <div id="shown" class="hidden">
+        READY
+      </div>
+
+
+
+      <div
+        id="answerBox"
+        class="hidden"
+      >
+
+
+        <div
+          class="answerlabel"
+          data-i18n="writeSeen"
+        >
+          Escreva o que você viu
+        </div>
+
+
+        <input
+          id="answer"
+
+          autocomplete="off"
+
+          autocapitalize="off"
+
+          spellcheck="false"
+        >
+
+
+        <div id="feedback"></div>
+
+
+      </div>
+
+
+    </div>
+
+
+
+    <!-- CONTROLES PRINCIPAIS CONTINUAM -->
+
+    <div class="controls">
+
+
+      <button
+        id="prev"
+        data-i18n="previous"
+      >
+        ← Anterior
+      </button>
+
+
+      <button
+        id="replay"
+        class="primary"
+        data-i18n="showAgain"
+      >
+        ↻ Mostrar de novo
+      </button>
+
+
+      <button
+        id="next"
+        class="dark"
+        data-i18n="next"
+      >
+        Próximo →
+      </button>
+
+
+    </div>
+
+
+
+    <!--
+      ESTES 3 NÃO APARECEM MAIS.
+      AINDA EXISTEM PARA NÃO QUEBRAR O APP.JS.
+    -->
+
+    <div class="controls smallcontrols">
+
+
+      <button id="prevLevel">
+        ← Nível anterior
+      </button>
+
+
+      <button id="pause">
+        ⏸ Pausar
+      </button>
+
+
+      <button id="nextLevel">
+        Próximo nível →
+      </button>
+
+
+    </div>
+
+
+  </div>
+
+
+</section>
+
+
+<!-- ======================================================
+     TELA 4 - CONFIGURAÇÕES SEPARADA
+     ====================================================== -->
+<section id="settingsPage" class="hidden">
+
+  <div class="page-topbar">
+    <button id="settingsBackToTrain" type="button">← Voltar</button>
+    <strong data-i18n="settings">Configurações</strong>
+  </div>
 
   <div
     id="settings"
@@ -1383,136 +1606,6 @@ body.start-open #floating-subscribe{
 
   </div>
 
-
-
-  <!-- ====================================================
-       ÁREA DO EXERCÍCIO
-       ==================================================== -->
-
-  <div class="card">
-
-
-    <div class="meta">
-
-
-      <span id="badge"></span>
-
-
-      <span id="clock"></span>
-
-
-    </div>
-
-
-
-    <div id="stage">
-
-
-      <div id="shown">
-        READY
-      </div>
-
-
-
-      <div
-        id="answerBox"
-        class="hidden"
-      >
-
-
-        <div
-          class="answerlabel"
-          data-i18n="writeSeen"
-        >
-          Escreva o que você viu
-        </div>
-
-
-        <input
-          id="answer"
-
-          autocomplete="off"
-
-          autocapitalize="off"
-
-          spellcheck="false"
-        >
-
-
-        <div id="feedback"></div>
-
-
-      </div>
-
-
-    </div>
-
-
-
-    <!-- CONTROLES PRINCIPAIS CONTINUAM -->
-
-    <div class="controls">
-
-
-      <button
-        id="prev"
-        data-i18n="previous"
-      >
-        ← Anterior
-      </button>
-
-
-      <button
-        id="replay"
-        class="primary"
-        data-i18n="showAgain"
-      >
-        ↻ Mostrar de novo
-      </button>
-
-
-      <button
-        id="next"
-        class="dark"
-        data-i18n="next"
-      >
-        Próximo →
-      </button>
-
-
-    </div>
-
-
-
-    <!--
-      ESTES 3 NÃO APARECEM MAIS.
-      AINDA EXISTEM PARA NÃO QUEBRAR O APP.JS.
-    -->
-
-    <div class="controls smallcontrols">
-
-
-      <button id="prevLevel">
-        ← Nível anterior
-      </button>
-
-
-      <button id="pause">
-        ⏸ Pausar
-      </button>
-
-
-      <button id="nextLevel">
-        Próximo nível →
-      </button>
-
-
-    </div>
-
-
-  </div>
-
-
 </section>
 
 
@@ -1524,7 +1617,7 @@ body.start-open #floating-subscribe{
      APP ORIGINAL
      ====================================================== -->
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 
 
 
@@ -3144,6 +3237,169 @@ setInterval(
 
 
 /* =========================================================
+   NAVEGAÇÃO V5 - TREINO / MATERIAL / CONFIGURAÇÕES
+   ========================================================= */
+
+const materialBackToTrain =
+  document.getElementById("materialBackToTrain");
+
+const settingsPage =
+  document.getElementById("settingsPage");
+
+const settingsBackToTrain =
+  document.getElementById("settingsBackToTrain");
+
+const openSettings =
+  document.getElementById("openSettings");
+
+const practiceStartBtn =
+  document.getElementById("practiceStartBtn");
+
+const setupPage =
+  document.getElementById("setup");
+
+const trainPage =
+  document.getElementById("train");
+
+const hiddenAppStart =
+  document.getElementById("start");
+
+const hiddenPause =
+  document.getElementById("pause");
+
+let pausedBySettings = false;
+
+function prepareTrainingStart(){
+
+  /* Inicializa o treino usando o app.js original. */
+  hiddenAppStart?.click();
+
+  setTimeout(()=>{
+
+    if(trainPage?.classList.contains("hidden")){
+      return;
+    }
+
+    /* Pausa imediatamente para deixar o botão COMEÇAR no centro. */
+    if(hiddenPause && hiddenPause.textContent.includes("Pausar")){
+      hiddenPause.click();
+    }
+
+    const shown = document.getElementById("shown");
+    const answerBox = document.getElementById("answerBox");
+    const clock = document.getElementById("clock");
+
+    shown?.classList.add("hidden");
+    answerBox?.classList.add("hidden");
+
+    if(clock){
+      clock.textContent="";
+    }
+
+    if(practiceStartBtn){
+      practiceStartBtn.classList.remove("hidden");
+    }
+
+  },30);
+}
+
+/* Substitui o comportamento antigo do botão da capa. */
+startCoverBtn?.addEventListener(
+  "click",
+  e=>{
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    hideStartScreen();
+
+    settingsPage?.classList.add("hidden");
+    setupPage?.classList.add("hidden");
+
+    prepareTrainingStart();
+
+  },
+  true
+);
+
+practiceStartBtn?.addEventListener(
+  "click",
+  ()=>{
+
+    practiceStartBtn.classList.add("hidden");
+
+    /* O app estava pausado aguardando COMEÇAR. */
+    if(hiddenPause && hiddenPause.textContent.includes("Continuar")){
+      hiddenPause.click();
+    }
+
+  }
+);
+
+/* MATERIAL: abre a tela completa de material. O app.js original
+   continua cuidando do conteúdo e dos dados. */
+document.getElementById("back")?.addEventListener(
+  "click",
+  ()=>{
+    settingsPage?.classList.add("hidden");
+  }
+);
+
+materialBackToTrain?.addEventListener(
+  "click",
+  ()=>{
+
+    setupPage?.classList.add("hidden");
+    settingsPage?.classList.add("hidden");
+
+    hiddenAppStart?.click();
+
+  }
+);
+
+/* CONFIGURAÇÕES: tela separada, sem X e sem hambúrguer. */
+openSettings?.addEventListener(
+  "click",
+  ()=>{
+
+    pausedBySettings=false;
+
+    if(hiddenPause && hiddenPause.textContent.includes("Pausar")){
+      hiddenPause.click();
+      pausedBySettings=true;
+    }
+
+    trainPage?.classList.add("hidden");
+    setupPage?.classList.add("hidden");
+
+    settingsPage?.classList.remove("hidden");
+    document.getElementById("settings")?.classList.remove("hidden");
+
+    window.scrollTo({top:0,behavior:"smooth"});
+
+  }
+);
+
+settingsBackToTrain?.addEventListener(
+  "click",
+  ()=>{
+
+    settingsPage?.classList.add("hidden");
+    setupPage?.classList.add("hidden");
+    trainPage?.classList.remove("hidden");
+
+    if(pausedBySettings && hiddenPause?.textContent.includes("Continuar")){
+      hiddenPause.click();
+    }
+
+    pausedBySettings=false;
+
+    window.scrollTo({top:0,behavior:"smooth"});
+
+  }
+);
+
+/* =========================================================
    SERVICE WORKER
    ========================================================= */
 
@@ -3159,7 +3415,7 @@ if(
       navigator
         .serviceWorker
         .register(
-          "./sw.js?v=4",
+          "./sw.js?v=5",
           {
             updateViaCache:
               "none"
