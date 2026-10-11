@@ -32,7 +32,7 @@ jobs:
         run: python -m pip install requests beautifulsoup4
       - name: Write original English blog articles
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python auto_blog.py
       - name: Commit and push new articles
         id: commit
