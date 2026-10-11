@@ -282,7 +282,7 @@ def write_article(item, notes):
             "x-goog-api-key": key,
             "Content-Type": "application/json"
         },
-        timeout=70
+        timeout=(10, 100),
     )
 
     if not response.ok:
