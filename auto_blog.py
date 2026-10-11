@@ -20,7 +20,7 @@ NEWS_URL = "https://news.btcbrave.store/news.json"
 POSTS_FILE = Path("posts.json")
 CATEGORIES = ("crypto", "finance", "technology", "ai", "world")
 DAILY_LIMIT = 3
-MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 USER_AGENT = "BTCBRAVE-AutoBlog/4.0 (+https://news.btcbrave.store/)"
 
 
