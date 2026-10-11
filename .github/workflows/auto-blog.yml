@@ -2,7 +2,7 @@ name: Auto Publish BTCBRAVE Blog
 
 on:
   schedule:
-    # Three publishing rounds per day (UTC), up to 1 post per category each round.
+    # 3 rounds per day in UTC; at most 3 posts per topic each day
     - cron: "17 8,14,20 * * *"
   workflow_dispatch:
 
@@ -16,45 +16,37 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Install image dependency
-        run: python -m pip install Pillow
-
-      - name: Create English briefs and unique cover images
+      - name: Install dependencies
+        run: python -m pip install requests beautifulsoup4
+      - name: Write original English blog articles
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python auto_blog.py
-
-      - name: Commit and push new blog posts and images
+      - name: Commit and push new articles
         id: commit
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- posts.json
-          if [ -d blog-covers ]; then
-            git add -- blog-covers
-          fi
-
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No new posts."
+            echo "No new articles."
             exit 0
           fi
-
-          git commit -m "Auto publish BTCBRAVE Blog posts and covers"
+          git commit -m "Auto publish original BTCBRAVE Blog articles"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -75,22 +67,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-
       - name: Provide root entry if needed
         shell: bash
         run: |
           if [ ! -f index.html ] && [ ! -f index.md ] && [ ! -f README.md ]; then
             printf '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=https://news.btcbrave.store/"></head><body><a href="https://news.btcbrave.store/">BTCBRAVE News</a></body></html>\n' > index.html
           fi
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: .
-
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
