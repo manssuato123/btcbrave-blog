@@ -14,8 +14,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 NEWS_URL = "https://news.btcbrave.store/news.json"
 POSTS_FILE = Path("posts.json")
-IMAGE_FOLDER = Path("imgs/auto")
-IMAGE_BASE = "https://blog.btcbrave.store/imgs/auto"
+IMAGE_FOLDER = Path("blog-covers")
+IMAGE_BASE = "https://blog.btcbrave.store/blog-covers"
 TOPICS = ("crypto", "finance", "technology", "ai", "world")
 MAX_PER_TOPIC_PER_DAY = 3
 
