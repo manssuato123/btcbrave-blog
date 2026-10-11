@@ -1,4 +1,8 @@
-"""BTCBRAVE automatic blog briefs and original graphic cover images."""
+"""BTCBRAVE Blog: automated English news briefs without images.
+
+Publishes at most one article per category per run and three per category
+per UTC day. Existing blog thumbnails are cleared without deleting posts.
+"""
 
 import hashlib
 import html
@@ -10,40 +14,28 @@ from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
-from PIL import Image, ImageDraw, ImageFont
-
 NEWS_URL = "https://news.btcbrave.store/news.json"
 POSTS_FILE = Path("posts.json")
-IMAGE_FOLDER = Path("blog-covers")
-IMAGE_BASE = "https://blog.btcbrave.store/blog-covers"
 TOPICS = ("crypto", "finance", "technology", "ai", "world")
 MAX_PER_TOPIC_PER_DAY = 3
 
-PALETTE = {
-    "crypto": ((8, 18, 34), (241, 174, 61)),
-    "finance": ((9, 28, 40), (49, 213, 178)),
-    "technology": ((8, 21, 48), (76, 147, 255)),
-    "ai": ((25, 14, 53), (178, 109, 255)),
-    "world": ((36, 19, 31), (255, 142, 100)),
-}
 
-
-class OnlyText(HTMLParser):
+class TextOnly(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.parts = []
+        self.words = []
 
-    def handle_data(self, data):
-        self.parts.append(data)
+    def handle_data(self, text):
+        self.words.append(text)
 
 
-def clean_text(value):
-    parser = OnlyText()
+def plain(value):
+    parser = TextOnly()
     parser.feed(html.unescape(str(value or "")))
-    return re.sub(r"\s+", " ", " ".join(parser.parts)).strip()
+    return re.sub(r"\s+", " ", " ".join(parser.words)).strip()
 
 
-def get_date(value):
+def parse_date(value):
     try:
         result = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
         if result.tzinfo is None:
@@ -53,270 +45,187 @@ def get_date(value):
         return None
 
 
-def normal_link(value):
+def canonical_url(value):
     try:
-        url = urlsplit(str(value or "").strip())
-        if url.scheme not in ("http", "https") or not url.netloc:
+        u = urlsplit(str(value or "").strip())
+        if u.scheme not in ("https", "http") or not u.netloc:
             return ""
         query = urlencode([
-            (key, value) for key, value in parse_qsl(url.query)
+            (key, val) for key, val in parse_qsl(u.query, keep_blank_values=True)
             if not key.lower().startswith("utm_")
             and key.lower() not in ("fbclid", "gclid")
         ])
-        return urlunsplit((url.scheme.lower(), url.netloc.lower(),
-                           url.path.rstrip("/") or "/", query, ""))
-    except ValueError:
+        return urlunsplit((
+            u.scheme.lower(), u.netloc.lower(),
+            u.path.rstrip("/") or "/", query, ""
+        ))
+    except (ValueError, TypeError):
         return ""
 
 
-def get_json(url):
-    request = Request(url, headers={
-        "User-Agent": "BTCBRAVE-AutoBlog/2.0",
-        "Accept": "application/json",
-    })
-    with urlopen(request, timeout=35) as response:
-        data = json.load(response)
+def load_json_list(path):
+    if not path.exists():
+        raise FileNotFoundError(f"{path} does not exist: nothing changed")
+    data = json.loads(path.read_text(encoding="utf-8-sig"))
     if not isinstance(data, list):
-        raise ValueError("news.json must contain a JSON list")
+        raise ValueError(f"{path} must contain a JSON array")
     return data
 
 
-def load_posts():
-    if not POSTS_FILE.exists():
-        raise FileNotFoundError("posts.json is missing; no files changed")
-    posts = json.loads(POSTS_FILE.read_text(encoding="utf-8-sig"))
-    if not isinstance(posts, list):
-        raise ValueError("posts.json must contain a JSON list")
-    return posts
+def fetch_news():
+    request = Request(NEWS_URL, headers={
+        "User-Agent": "BTCBRAVE-AutoBlog/3.0",
+        "Accept": "application/json",
+    })
+    with urlopen(request, timeout=35) as response:
+        items = json.load(response)
+    if not isinstance(items, list):
+        raise ValueError("news.json must contain a JSON array")
+    return items
 
 
-def load_font(size, bold=True):
-    name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
-    path = Path("/usr/share/fonts/truetype/dejavu") / name
-    try:
-        return ImageFont.truetype(str(path), size)
-    except OSError:
-        return ImageFont.truetype(name, size)
+def generate_post(item, now):
+    topic = str(item["category"]).lower()
+    title = plain(item["title"])[:200]
+    description = plain(item.get("description"))
+    source_link = str(item["link"]).strip()
+    source = (urlsplit(source_link).hostname or "Original publisher").removeprefix("www.")
+    published = parse_date(item.get("pubDate")) or now
 
-
-def wrap_text(draw, title, font, max_width, max_lines=4):
-    words = title.split()
-    result = []
-    for word in words:
-        if result and draw.textbbox((0, 0), result[-1] + " " + word,
-                                    font=font)[2] <= max_width:
-            result[-1] += " " + word
-        else:
-            result.append(word)
-    if len(result) > max_lines:
-        result = result[:max_lines]
-        while result[-1] and draw.textbbox(
-            (0, 0), result[-1] + "...", font=font
-        )[2] > max_width:
-            result[-1] = result[-1].rsplit(" ", 1)[0] if " " in result[-1] else result[-1][:-1]
-        result[-1] += "..."
-    return result
-
-
-def make_image(title, topic, identifier, now):
-    """Create an original abstract illustration; no news photo is copied."""
-    width, height = 1200, 675
-    dark, bright = PALETTE[topic]
-    pic = Image.new("RGB", (width, height), dark)
-    draw = ImageDraw.Draw(pic)
-    for y in range(height):
-        color = tuple(min(255, int(c + (y / height) * 18)) for c in dark)
-        draw.line((0, y, width, y), fill=color)
-
-    art = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    graphic = ImageDraw.Draw(art)
-    seed = int(identifier[:8], 16)
-    for idx in range(5):
-        size = 190 + (seed // (idx + 1)) % 170
-        x = 850 + (idx * 74) - 120
-        y = 20 + (idx * 95) - 120
-        graphic.ellipse((x, y, x + size, y + size),
-                        outline=(*bright, 65), width=6)
-    for idx in range(9):
-        y = 150 + idx * 47
-        graphic.line((760, y, 1180, y - 65),
-                     fill=(*bright, 26), width=2)
-    pic = Image.alpha_composite(pic.convert("RGBA"), art)
-    draw = ImageDraw.Draw(pic)
-
-    draw.rounded_rectangle((66, 60, 415, 113), radius=20,
-                           fill=(*bright, 48), outline=bright, width=2)
-    draw.text((88, 67), "BTCBRAVE  /  BLOG", font=load_font(25), fill=(250, 251, 255))
-    draw.rounded_rectangle((66, 151, 315, 208), radius=20, fill=bright)
-    draw.text((86, 160), topic.upper(), font=load_font(28), fill=dark)
-
-    font = load_font(58)
-    title = clean_text(title)
-    lines = wrap_text(draw, title, font, 995, max_lines=4)
-    y = 250
-    for line in lines:
-        draw.text((70, y), line, font=font, fill=(249, 250, 253),
-                  stroke_width=1, stroke_fill=dark)
-        y += 77
-
-    draw.line((70, 598, 1130, 598), fill=bright, width=3)
-    draw.text((70, 615), "ORIGINAL GRAPHIC ILLUSTRATION",
-              font=load_font(20, bold=False), fill=(207, 215, 231))
-    draw.text((1022, 615), now.strftime("%d %b %Y"),
-              font=load_font(17, bold=False), fill=(207, 215, 231),
-              anchor="ra")
-
-    date_path = now.strftime("%Y/%m/%d")
-    filename = f"{topic}-{identifier[:14]}.png"
-    destination = IMAGE_FOLDER / date_path / filename
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    pic.convert("RGB").save(destination, format="PNG", optimize=True)
-    return f"{IMAGE_BASE}/{date_path}/{filename}"
-
-
-def make_post(item, now):
-    title = clean_text(item["title"])
-    description = clean_text(item["description"])
-    url = item["link"]
-    host = urlsplit(url).hostname or "Original publisher"
-    source = host.removeprefix("www.")
-    published = get_date(item.get("pubDate")) or now
-    topic = item["category"].lower()
-    identifier = hashlib.sha256(normal_link(url).encode("utf-8")).hexdigest()
-
-    # At most 24 quoted words from the publisher's RSS snippet.
-    excerpt = description.split()[:24]
-    first = " ".join(excerpt[:12])
-    second = " ".join(excerpt[12:])
+    # Attribute a brief extract instead of copying the full article.
+    words = description.split()[:24]
+    first = " ".join(words[:12])
+    second = " ".join(words[12:])
     if len(description.split()) > 24:
-        second += "..."
+        second += "…"
 
-    # Exactly 10 brief English lines; do not invent events or unseen facts.
-    rows = [
-        f"BTCBRAVE {topic.title()} News Brief.",
-        f"Headline: {title}.",
-        f"Original reporting: {source}.",
-        "The publisher's RSS summary states:",
-        f"{first}",
-        f"{second}",
-        "This is a short source-attributed overview, not a complete report.",
-        "The original article contains the complete reporting and context.",
-        f"Original story date: {published.strftime('%d %B %Y')}.",
-        f'Read the original story: <a href="{html.escape(url, quote=True)}" '
-        'target="_blank" rel="noopener noreferrer">Open source</a>.',
+    # Ten short paragraphs, with original reporting linked.
+    lines = [
+        f"BTCBRAVE {topic.title()} News Brief",
+        f"Headline: {title}",
+        f"Original reporting by: {source}",
+        "The publisher's RSS summary says:",
+        first,
+        second,
+        "This is a source-attributed brief, not an independent report.",
+        "The complete article may contain important further context.",
+        f"Original story date: {published.strftime('%d %B %Y')}",
     ]
-    body = "\n".join(
-        f"<p>{row}</p>" if index == 9 else f"<p>{html.escape(row)}</p>"
-        for index, row in enumerate(rows)
+    body = "\n".join(f"<p>{html.escape(line)}</p>" for line in lines)
+    safe_link = html.escape(source_link, quote=True)
+    body += (
+        '\n<p><a href="' + safe_link + '" target="_blank" '
+        'rel="noopener noreferrer">Read the original article</a></p>'
     )
-    cover_url = make_image(title, topic, identifier, now)
+
     return {
         "title": title,
-        "description": " ".join(excerpt) + ("..." if len(description.split()) > 24 else ""),
-        "link": "",
-        "thumbnail": cover_url,
+        "description": " ".join(words) + ("…" if len(description.split()) > 24 else ""),
+        "thumbnail": "",  # No photos or cover images in the Blog.
         "pubDate": now.isoformat(timespec="seconds"),
         "fullText": body,
         "category": topic,
-        "sourceLink": url,
+        "link": "",
+        "sourceLink": source_link,
         "source": source,
         "autoGenerated": True,
-        "imageCredit": "Original BTCBRAVE graphic illustration",
     }
 
 
 def main():
     now = datetime.now(timezone.utc)
-    print("[START] BTCBRAVE daily blog automation", flush=True)
-    posts = load_posts()
-    news = get_json(NEWS_URL)
-    print(f"[INFO] {len(news)} news articles available", flush=True)
+    print("[START] BTCBRAVE Blog without images", flush=True)
+    posts = load_json_list(POSTS_FILE)
 
-    # Replace previous auto-post thumbnails that reused publishers' images.
-    repaired_covers = 0
-    for post in posts:
-        if not isinstance(post, dict) or not post.get("autoGenerated"):
-            continue
-        topic = str(post.get("category") or "").lower()
-        if topic not in TOPICS or not post.get("title"):
-            continue
-        current_image = str(post.get("thumbnail") or "")
-        if current_image.startswith(IMAGE_BASE + "/"):
-            continue
-        source = normal_link(post.get("sourceLink") or post.get("link"))
-        identity = hashlib.sha256(
-            (source or clean_text(post["title"])).encode("utf-8")
-        ).hexdigest()
-        date = get_date(post.get("pubDate")) or now
-        post["thumbnail"] = make_image(post["title"], topic, identity, date)
-        post["imageCredit"] = "Original BTCBRAVE graphic illustration"
-        repaired_covers += 1
-    if repaired_covers:
-        print(f"[FIXED] Replaced {repaired_covers} earlier thumbnail(s)", flush=True)
-
-    count_today = {topic: 0 for topic in TOPICS}
-    seen_urls = set()
-    seen_titles = set()
+    # Remove image references from old posts, preserving their content.
+    cleared = 0
     for post in posts:
         if not isinstance(post, dict):
             continue
-        url = normal_link(post.get("sourceLink") or post.get("link"))
+        if post.get("thumbnail"):
+            post["thumbnail"] = ""
+            cleared += 1
+        post.pop("imageCredit", None)
+
+    count_today = {topic: 0 for topic in TOPICS}
+    used_urls = set()
+    used_titles = set()
+
+    for post in posts:
+        if not isinstance(post, dict):
+            continue
+        url = canonical_url(post.get("sourceLink") or post.get("link"))
         if url:
-            seen_urls.add(url)
-        seen_titles.add(clean_text(post.get("title")).casefold())
-        date = get_date(post.get("pubDate"))
+            used_urls.add(url)
+        title = plain(post.get("title")).casefold()
+        if title:
+            used_titles.add(title)
+        date = parse_date(post.get("pubDate"))
         topic = str(post.get("category") or "").lower()
-        if (post.get("autoGenerated") and date and date.date() == now.date()
-                and topic in count_today):
+        if (
+            post.get("autoGenerated") and date and date.date() == now.date()
+            and topic in count_today
+        ):
             count_today[topic] += 1
+
+    news = fetch_news()
+    print(f"[INFO] {len(news)} news articles available", flush=True)
 
     candidates = {topic: [] for topic in TOPICS}
     for item in news:
         if not isinstance(item, dict):
             continue
         topic = str(item.get("category") or "").lower()
-        title = clean_text(item.get("title"))
-        description = clean_text(item.get("description"))
-        url = normal_link(item.get("link"))
-        date = get_date(item.get("pubDate"))
-        if (topic not in candidates or len(title) < 18
-                or len(description) < 70 or not url or not date
-                or url in seen_urls or title.casefold() in seen_titles
-                or date < now - timedelta(days=3)
-                or date > now + timedelta(minutes=10)):
+        title = plain(item.get("title"))
+        desc = plain(item.get("description"))
+        url = canonical_url(item.get("link"))
+        date = parse_date(item.get("pubDate"))
+        if (
+            topic not in candidates or len(title) < 18
+            or len(desc) < 70 or not url or not date
+            or date < now - timedelta(days=3)
+            or date > now + timedelta(minutes=10)
+            or url in used_urls or title.casefold() in used_titles
+        ):
             continue
         candidates[topic].append((date, item))
 
     created = []
     for topic in TOPICS:
         if count_today[topic] >= MAX_PER_TOPIC_PER_DAY:
-            print(f"[SKIP] {topic}: daily quota reached")
+            print(f"[SKIP] {topic}: daily limit reached", flush=True)
             continue
         candidates[topic].sort(key=lambda pair: pair[0], reverse=True)
         for _, item in candidates[topic]:
-            title_key = clean_text(item["title"]).casefold()
-            link_key = normal_link(item["link"])
-            if link_key in seen_urls or title_key in seen_titles:
+            link = canonical_url(item["link"])
+            title = plain(item["title"]).casefold()
+            if link in used_urls or title in used_titles:
                 continue
-            post = make_post(item, now)
+            post = generate_post(item, now)
             created.append(post)
-            seen_urls.add(link_key)
-            seen_titles.add(title_key)
+            used_urls.add(link)
+            used_titles.add(title)
             print(f"[CREATED] {topic}: {post['title']}", flush=True)
             break
         else:
-            print(f"[SKIP] {topic}: no suitable new news available")
+            print(f"[SKIP] {topic}: no suitable recent articles", flush=True)
 
-    if not created and not repaired_covers:
-        print("[DONE] No new posts; existing files preserved.")
+    if not created and not cleared:
+        print("[DONE] No changes", flush=True)
         return
 
-    posts = created + posts
-    temporary = POSTS_FILE.with_suffix(".json.tmp")
-    temporary.write_text(json.dumps(posts, indent=2, ensure_ascii=False) + "\n",
-                         encoding="utf-8")
+    output = created + posts
+    temporary = POSTS_FILE.with_name("posts.json.tmp")
+    temporary.write_text(
+        json.dumps(output, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     temporary.replace(POSTS_FILE)
-    print(f"[DONE] Added {len(created)} posts and repaired {repaired_covers} covers. Total: {len(posts)}", flush=True)
+    print(
+        f"[DONE] Added {len(created)} posts; removed {cleared} "
+        f"old image references; total {len(output)} posts",
+        flush=True,
+    )
 
 
 if __name__ == "__main__":
