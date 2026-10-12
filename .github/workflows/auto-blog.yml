@@ -30,12 +30,11 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: python -m pip install requests beautifulsoup4
-      - name: Generate original articles and Gemini illustrations
+      - name: Generate original articles (images added by local ComfyUI)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_IMAGE_MODEL: gemini-3.1-flash-image
         run: python auto_blog.py
-      - name: Commit and push articles and illustrations
+      - name: Commit and push articles
         id: commit
         shell: bash
         run: |
@@ -50,7 +49,7 @@ jobs:
             echo "No new or updated articles or images."
             exit 0
           fi
-          git commit -m "Publish BTCBRAVE Blog articles and Gemini illustrations"
+          git commit -m "Publish BTCBRAVE Blog articles"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
