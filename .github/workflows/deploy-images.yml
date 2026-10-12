@@ -1,0 +1,48 @@
+name: Deploy BTCBRAVE Blog after image updates
+
+# Local ComfyUI image worker pushes image files + updated posts.json to main.
+# This workflow republishes the GitHub Pages site after those pushes.
+# Pushes made with GitHub Actions' GITHUB_TOKEN do not trigger other workflows;
+# the original auto-blog.yml already handles its own Pages deploy.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - posts.json
+      - imgs/auto/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: btcbrave-blog-local-image-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout full website
+        uses: actions/checkout@v4
+      - name: Provide root entry if needed
+        shell: bash
+        run: |
+          if [ ! -f index.html ] && [ ! -f index.md ] && [ ! -f README.md ]; then
+            printf '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=https://news.btcbrave.store/"></head><body><a href="https://news.btcbrave.store/">BTCBRAVE News</a></body></html>\n' > index.html
+          fi
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
