@@ -24,6 +24,7 @@ CATEGORIES = ("crypto", "finance", "technology", "ai", "world", "games", "food")
 DAILY_LIMIT = 3
 CANDIDATES_PER_CATEGORY = 8
 TEXT_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+FALLBACK_TEXT_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-3.5-flash-lite")
 USER_AGENT = "BTCBRAVE-AutoBlog/6.0 (+https://news.btcbrave.store/)"
 MAX_RUN_SECONDS = 14 * 60
 MAX_TEXT_CALLS_PER_RUN = 10  # Avoid runaway API calls when publishers or Gemini are unavailable.
@@ -139,8 +140,12 @@ def gemini_request(model: str, payload: dict, timeout=(10, 75), api_version="v1b
             except (ValueError, AttributeError):
                 detail = "No additional details"
             last_error = GeminiError(response.status_code, str(detail))
-            # Do not retry model-not-found or invalid API key; do retry temporary overload.
-            if response.status_code not in (408, 429, 500, 502, 503, 504) or attempt == 2:
+            # A hard quota-exceeded 429 cannot be fixed by retrying immediately.
+            quota_exhausted = response.status_code == 429 and any(
+                marker in str(detail).lower()
+                for marker in ("exceeded your current quota", "quota exceeded", "resource_exhausted")
+            )
+            if quota_exhausted or response.status_code not in (408, 429, 500, 502, 503, 504) or attempt == 2:
                 raise last_error
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as exc:
             last_error = exc
@@ -179,7 +184,17 @@ def write_article(item, notes):
             "thinkingConfig": {"thinkingLevel": "low"},
         },
     }
-    data = gemini_request(TEXT_MODEL, payload, timeout=(8, 65), api_version="v1beta")
+    try:
+        data = gemini_request(TEXT_MODEL, payload, timeout=(8, 65), api_version="v1beta")
+    except GeminiError as exc:
+        if exc.code != 429 or not FALLBACK_TEXT_MODEL or FALLBACK_TEXT_MODEL == TEXT_MODEL:
+            raise
+        print(f"[FALLBACK] {TEXT_MODEL} quota/rate limit reached; trying {FALLBACK_TEXT_MODEL}", flush=True)
+        try:
+            data = gemini_request(FALLBACK_TEXT_MODEL, payload, timeout=(8, 65), api_version="v1beta")
+        except GeminiError as fallback_exc:
+            print(f"[WARN] Fallback model unavailable: {fallback_exc}", flush=True)
+            raise
     candidates = data.get("candidates") or []
     if not candidates:
         return None
