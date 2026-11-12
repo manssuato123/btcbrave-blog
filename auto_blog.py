@@ -191,7 +191,11 @@ def write_article(item, notes):
             raise
         print(f"[FALLBACK] {TEXT_MODEL} quota/rate limit reached; trying {FALLBACK_TEXT_MODEL}", flush=True)
         try:
-            data = gemini_request(FALLBACK_TEXT_MODEL, payload, timeout=(8, 65), api_version="v1beta")
+            fallback_payload = json.loads(json.dumps(payload))
+            # Gemini 2.5 uses thinkingBudget, not Gemini 3 thinkingLevel.
+            if FALLBACK_TEXT_MODEL.startswith("gemini-2.5"):
+                fallback_payload["generationConfig"].pop("thinkingConfig", None)
+            data = gemini_request(FALLBACK_TEXT_MODEL, fallback_payload, timeout=(8, 65), api_version="v1beta")
         except GeminiError as fallback_exc:
             print(f"[WARN] Fallback model unavailable: {fallback_exc}", flush=True)
             raise
